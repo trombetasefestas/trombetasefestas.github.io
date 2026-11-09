@@ -146,6 +146,7 @@ selV.onchange = () => aplicarVersao(selV.value);
 [inFrase, inData, inIgreja].forEach(i => i.oninput = desenhar);
 const pedido = new URLSearchParams(location.search).get('lang');      // ex.: ?lang=fr-10 abre já em francês
 if (pedido && VERSOES[pedido]) document.getElementById('textos').open = true;
+if (!pedido || pedido === 'pt-br') document.getElementById('textos').classList.add('hidden');   // link principal (Brasil): textos fixos
 aplicarVersao(VERSOES[pedido] ? pedido : 'pt-br');
 document.fonts && document.fonts.ready.then(desenhar);
 Promise.all(['700 40px Tinos', '400 40px Tinos', '600 40px "Barlow Condensed"', '500 40px "Barlow Condensed"'].map(f => document.fonts.load(f))).then(desenhar).catch(() => {});
