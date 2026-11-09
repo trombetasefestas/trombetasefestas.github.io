@@ -1,0 +1,155 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Eu vou! · Trombetas e Festas 2026</title>
+<meta name="description" content="Coloque sua foto na moldura do Trombetas e Festas 2026 e compartilhe: eu vou!">
+<style>
+  :root { --azul: #2f6f92; --azul-esc: #112e4e; --dourado: #f6d078; --branco: #fff; }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; min-height: 100vh; color: var(--branco);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+    background: linear-gradient(180deg, #2f6f92 0%, #3a86ad 60%, #5aa3c8 100%);
+    display: flex; flex-direction: column; align-items: center; padding: 18px 16px 40px;
+  }
+  h1 { font-size: 26px; margin: 6px 0 2px; letter-spacing: .5px; text-align: center; }
+  h1 span { color: var(--dourado); }
+  p.sub { margin: 0 0 16px; opacity: .9; text-align: center; font-size: 15px; max-width: 420px; }
+  .formatos { display: flex; gap: 8px; margin-bottom: 14px; }
+  .formatos button {
+    border: 2px solid rgba(255,255,255,.6); background: transparent; color: var(--branco);
+    padding: 9px 14px; border-radius: 999px; font-size: 15px; font-weight: 600; cursor: pointer;
+  }
+  .formatos button.ativo { background: var(--branco); color: var(--azul-esc); border-color: var(--branco); }
+  .palco {
+    position: relative; width: 100%; max-width: 420px; border-radius: 18px; overflow: hidden;
+    box-shadow: 0 14px 40px rgba(5,20,35,.45); background: #1d4d6b; touch-action: none;
+  }
+  canvas { display: block; width: 100%; height: auto; }
+  .dica {
+    position: absolute; left: 0; right: 0; top: 38%; text-align: center; font-weight: 700; font-size: 17px;
+    pointer-events: none; text-shadow: 0 2px 8px rgba(0,0,0,.5);
+  }
+  .controles { width: 100%; max-width: 420px; margin-top: 14px; display: flex; flex-direction: column; gap: 12px; }
+  label.foto, button.acao {
+    display: block; width: 100%; text-align: center; padding: 15px; border-radius: 14px; font-size: 17px; font-weight: 700;
+    border: 0; cursor: pointer; text-decoration: none;
+  }
+  label.foto { background: var(--branco); color: var(--azul-esc); }
+  label.foto input { display: none; }
+  button.acao { background: var(--dourado); color: var(--azul-esc); }
+  button.acao:disabled { opacity: .45; cursor: default; }
+  button.sec { background: var(--azul-esc); color: var(--branco); }
+  .zoom { display: flex; align-items: center; gap: 10px; font-size: 14px; }
+  .zoom input { flex: 1; accent-color: var(--dourado); }
+  .orient { font-size: 13px; opacity: .85; text-align: center; line-height: 1.45; margin-top: 4px; }
+  .hidden { display: none !important; }
+</style>
+</head>
+<body>
+  <h1>EU VOU! · <span>Trombetas e Festas 2026</span></h1>
+  <p class="sub">Coloque sua foto na moldura e mostre a todos que você vai participar no dia <b>28 de novembro, às 17h</b>.</p>
+
+  <div class="formatos" role="group" aria-label="Formato">
+    <button data-f="1x1" class="ativo">Feed (quadrado)</button>
+    <button data-f="9x16">Stories / Status</button>
+  </div>
+
+  <div class="palco" id="palco">
+    <canvas id="tela"></canvas>
+    <div class="dica" id="dica">Escolha sua foto abaixo 👇</div>
+  </div>
+
+  <div class="controles">
+    <label class="foto">📷 Escolher minha foto<input type="file" id="arquivo" accept="image/*"></label>
+    <div class="zoom hidden" id="zoomBox"><span>Zoom</span><input type="range" id="zoom" min="1" max="3" step="0.01" value="1"></div>
+    <p class="orient hidden" id="mover">Arraste a foto para ajustar a posição.</p>
+    <button class="acao" id="baixar" disabled>⬇️ Baixar imagem</button>
+    <button class="acao sec hidden" id="compartilhar">Compartilhar</button>
+    <p class="orient">Dica: use uma foto de rosto, bem iluminada. A imagem é montada no seu próprio celular, nenhuma foto é enviada para a internet.</p>
+  </div>
+
+<script>
+// molduras (PNG com a janela transparente) e posição da janela em cada formato
+const MOLDURAS = {
+  '1x1':  { src: 'moldura_eu_vou_1x1.png',  w: 1080, h: 1080, win: [0, 0, 1080, 760] },
+  '9x16': { src: 'moldura_eu_vou_9x16.png', w: 1080, h: 1920, win: [0, 0, 1080, 1330] },
+};
+const tela = document.getElementById('tela'), ctx = tela.getContext('2d');
+const dica = document.getElementById('dica'), zoom = document.getElementById('zoom');
+const baixar = document.getElementById('baixar'), compartilhar = document.getElementById('compartilhar');
+let formato = '1x1', foto = null, img = {};
+let est = { s: 1, x: 0, y: 0 };   // escala extra e deslocamento (px da moldura) da foto
+
+for (const [k, m] of Object.entries(MOLDURAS)) { const i = new Image(); i.onload = desenhar; i.src = m.src; img[k] = i; }
+
+function base() {              // escala que faz a foto cobrir a janela
+  const [x0, y0, x1, y1] = MOLDURAS[formato].win;
+  return Math.max((x1 - x0) / foto.width, (y1 - y0) / foto.height);
+}
+function desenhar() {
+  const m = MOLDURAS[formato]; tela.width = m.w; tela.height = m.h;
+  ctx.fillStyle = '#1d4d6b'; ctx.fillRect(0, 0, m.w, m.h);
+  if (foto) {
+    const [x0, y0, x1, y1] = m.win, k = base() * est.s;
+    const w = foto.width * k, h = foto.height * k;
+    const cx = (x0 + x1) / 2 + est.x, cy = (y0 + y1) / 2 + est.y;
+    ctx.drawImage(foto, cx - w / 2, cy - h / 2, w, h);
+  }
+  if (img[formato] && img[formato].complete) ctx.drawImage(img[formato], 0, 0, m.w, m.h);
+}
+function limitar() {           // não deixa aparecer buraco na janela
+  const [x0, y0, x1, y1] = MOLDURAS[formato].win, k = base() * est.s;
+  const mx = Math.max(0, (foto.width * k - (x1 - x0)) / 2), my = Math.max(0, (foto.height * k - (y1 - y0)) / 2);
+  est.x = Math.min(mx, Math.max(-mx, est.x)); est.y = Math.min(my, Math.max(-my, est.y));
+}
+
+document.querySelectorAll('.formatos button').forEach(b => b.onclick = () => {
+  document.querySelectorAll('.formatos button').forEach(x => x.classList.toggle('ativo', x === b));
+  formato = b.dataset.f; est = { s: 1, x: 0, y: 0 }; zoom.value = 1; desenhar();
+});
+
+document.getElementById('arquivo').onchange = e => {
+  const f = e.target.files[0]; if (!f) return;
+  const i = new Image();
+  i.onload = () => {
+    foto = i; est = { s: 1, x: 0, y: 0 }; zoom.value = 1;
+    dica.classList.add('hidden'); baixar.disabled = false;
+    document.getElementById('zoomBox').classList.remove('hidden'); document.getElementById('mover').classList.remove('hidden');
+    if (navigator.canShare) compartilhar.classList.remove('hidden');
+    desenhar();
+  };
+  i.src = URL.createObjectURL(f);
+};
+zoom.oninput = () => { if (!foto) return; est.s = +zoom.value; limitar(); desenhar(); };
+
+// arrastar (mouse ou dedo) e pinça com dois dedos
+const ptrs = new Map(); let ini = null;
+function escalaTela() { return tela.width / tela.getBoundingClientRect().width; }
+tela.addEventListener('pointerdown', e => { if (!foto) return; tela.setPointerCapture(e.pointerId); ptrs.set(e.pointerId, { x: e.clientX, y: e.clientY }); ini = null; });
+tela.addEventListener('pointermove', e => {
+  if (!foto || !ptrs.has(e.pointerId)) return;
+  const ant = ptrs.get(e.pointerId); ptrs.set(e.pointerId, { x: e.clientX, y: e.clientY });
+  if (ptrs.size === 1) {
+    const k = escalaTela(); est.x += (e.clientX - ant.x) * k; est.y += (e.clientY - ant.y) * k;
+  } else if (ptrs.size === 2) {
+    const [a, b] = [...ptrs.values()], dist = Math.hypot(a.x - b.x, a.y - b.y);
+    if (ini) { est.s = Math.min(3, Math.max(1, ini.s * dist / ini.d)); zoom.value = est.s; } else ini = { d: dist, s: est.s };
+  }
+  limitar(); desenhar();
+});
+['pointerup', 'pointercancel'].forEach(t => tela.addEventListener(t, e => { ptrs.delete(e.pointerId); ini = null; }));
+
+function arquivoFinal(cb) { tela.toBlob(b => cb(new File([b], 'eu-vou-trombetas-e-festas-2026.jpg', { type: 'image/jpeg' })), 'image/jpeg', 0.92); }
+baixar.onclick = () => arquivoFinal(f => {
+  const a = document.createElement('a'); a.href = URL.createObjectURL(f); a.download = f.name;
+  document.body.appendChild(a); a.click(); a.remove();
+});
+compartilhar.onclick = () => arquivoFinal(f => {
+  if (navigator.canShare && navigator.canShare({ files: [f] })) navigator.share({ files: [f], title: 'Eu vou! Trombetas e Festas 2026' }).catch(() => {});
+});
+</script>
+</body>
+</html>
