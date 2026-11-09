@@ -5,6 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Eu vou! · Trombetas e Festas 2026</title>
 <meta name="description" content="Coloque sua foto na moldura do Trombetas e Festas 2026 e compartilhe: eu vou!">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600&family=Tinos:wght@400;700&display=swap" rel="stylesheet">
 <style>
   :root { --azul: #2f6f92; --azul-esc: #112e4e; --dourado: #f6d078; --branco: #fff; }
   * { box-sizing: border-box; }
@@ -29,7 +32,7 @@
   }
   canvas { display: block; width: 100%; height: auto; }
   .dica {
-    position: absolute; left: 0; right: 0; top: 38%; text-align: center; font-weight: 700; font-size: 17px;
+    position: absolute; left: 0; right: 0; top: 30%; text-align: center; font-weight: 700; font-size: 17px;
     pointer-events: none; text-shadow: 0 2px 8px rgba(0,0,0,.5);
   }
   .controles { width: 100%; max-width: 420px; margin-top: 14px; display: flex; flex-direction: column; gap: 12px; }
@@ -45,15 +48,21 @@
   .zoom { display: flex; align-items: center; gap: 10px; font-size: 14px; }
   .zoom input { flex: 1; accent-color: var(--dourado); }
   .orient { font-size: 13px; opacity: .85; text-align: center; line-height: 1.45; margin-top: 4px; }
+  details.textos { background: rgba(17,46,78,.45); border-radius: 14px; padding: 12px 14px; }
+  details.textos summary { cursor: pointer; font-weight: 700; font-size: 15px; }
+  .campo { display: flex; flex-direction: column; gap: 4px; margin-top: 10px; font-size: 13px; }
+  .campo input, .campo select {
+    font-size: 16px; padding: 10px 12px; border-radius: 10px; border: 0; color: var(--azul-esc); background: #fff; width: 100%;
+  }
   .hidden { display: none !important; }
 </style>
 </head>
 <body>
-  <h1>EU VOU! · <span>Trombetas e Festas 2026</span></h1>
-  <p class="sub">Coloque sua foto na moldura e mostre a todos que você vai participar no dia <b>28 de novembro, às 17h</b>.</p>
+  <h1><b id="t_h1">EU VOU!</b> · <span id="t_tit">Trombetas e Festas 2026</span></h1>
+  <p class="sub" id="t_sub">Coloque sua foto na moldura e mostre a todos que você vai participar.</p>
 
   <div class="formatos" role="group" aria-label="Formato">
-    <button data-f="1x1" class="ativo">Feed (quadrado)</button>
+    <button data-f="1x1" class="ativo" id="t_feed">Feed (quadrado)</button>
     <button data-f="9x16">Stories / Status</button>
   </div>
 
@@ -63,29 +72,124 @@
   </div>
 
   <div class="controles">
-    <label class="foto">📷 Escolher minha foto<input type="file" id="arquivo" accept="image/*"></label>
-    <div class="zoom hidden" id="zoomBox"><span>Zoom</span><input type="range" id="zoom" min="1" max="3" step="0.01" value="1"></div>
+    <label class="foto"><span id="t_foto">📷 Escolher minha foto</span><input type="file" id="arquivo" accept="image/*"></label>
+    <div class="zoom hidden" id="zoomBox"><span id="t_zoom">Zoom</span><input type="range" id="zoom" min="1" max="3" step="0.01" value="1"></div>
     <p class="orient hidden" id="mover">Arraste a foto para ajustar a posição.</p>
+
+    <details class="textos" id="textos">
+      <summary id="t_sum">🌎 Idioma, data e horário</summary>
+      <div class="campo"><span id="t_l1">Idioma / país</span><select id="versao"></select></div>
+      <div class="campo"><span id="t_l2">Frase</span><input id="frase" maxlength="22"></div>
+      <div class="campo"><span id="t_l3">Data e horário</span><input id="data" maxlength="60"></div>
+      <div class="campo"><span id="t_l4">Igreja</span><input id="igreja" maxlength="60"></div>
+    </details>
+
     <button class="acao" id="baixar" disabled>⬇️ Baixar imagem</button>
     <button class="acao sec hidden" id="compartilhar">Compartilhar</button>
-    <p class="orient">Dica: use uma foto de rosto, bem iluminada. A imagem é montada no seu próprio celular, nenhuma foto é enviada para a internet.</p>
+    <p class="orient" id="t_dica">Dica: use uma foto de rosto, bem iluminada. A imagem é montada no seu próprio celular, nenhuma foto é enviada para a internet.</p>
   </div>
 
 <script>
-// molduras (PNG com a janela transparente) e posição da janela em cada formato
+// moldura base (sem textos) e posições dos textos em cada formato (px da imagem final)
 const MOLDURAS = {
-  '1x1':  { src: 'moldura_eu_vou_1x1.png',  w: 1080, h: 1080, win: [0, 0, 1080, 760] },
-  '9x16': { src: 'moldura_eu_vou_9x16.png', w: 1080, h: 1920, win: [0, 0, 1080, 1330] },
+  '1x1':  { src: 'moldura_base_1x1.png',  w: 1080, h: 1080, win: [0, 0, 1080, 760],
+            L: { eu_y: 735, eu_s: 150, dt_y: 845, dt_s: 44, ln: 70, ti_w: 230, ti_y: 890, ig_y: 1035, ig_s: 26 } },
+  '9x16': { src: 'moldura_base_9x16.png', w: 1080, h: 1920, win: [0, 0, 1080, 1330],
+            L: { eu_y: 1335, eu_s: 200, dt_y: 1480, dt_s: 50, ln: 40, ti_w: 400, ti_y: 1550, ig_y: 1835, ig_s: 36 } },
 };
+// versões por idioma/país (os campos ficam editáveis); título 'pt' usa a arte oficial
+const VERSOES = {
+  'pt-br':   { nome: 'Português · Brasil (28/11, 17h)', frase: 'EU VOU', titulo: 'pt', data: '28 DE NOVEMBRO · SÁBADO · 17H', igreja: 'EM UMA IGREJA CRISTÃ MARANATA' },
+  'pt-pt':   { nome: 'Português · Portugal (28/11, 20h)', frase: 'EU VOU', titulo: 'pt', data: '28 DE NOVEMBRO · SÁBADO · 20H', igreja: 'EM UMA IGREJA CRISTÃ MARANATA' },
+  'fr-28':   { nome: 'Français (28/11, 17h Brasília)', frase: "J'Y SERAI", titulo: ['TROMPETTES', 'et', 'FÊTES'], data: 'SAMEDI 28 NOVEMBRE · 17H00 (HEURE DE BRASÍLIA)', igreja: 'DANS UNE ÉGLISE CHRÉTIENNE MARANATHA' },
+  'fr-10':   { nome: 'Français (29/11, 10h)', frase: "J'Y SERAI", titulo: ['TROMPETTES', 'et', 'FÊTES'], data: 'DIMANCHE 29 NOVEMBRE · 10H', igreja: 'DANS UNE ÉGLISE CHRÉTIENNE MARANATHA' },
+  'fr-1030': { nome: 'Français (29/11, 10h30)', frase: "J'Y SERAI", titulo: ['TROMPETTES', 'et', 'FÊTES'], data: 'DIMANCHE 29 NOVEMBRE · 10H30', igreja: 'DANS UNE ÉGLISE CHRÉTIENNE MARANATHA' },
+  'nl-28':   { nome: 'Nederlands (28/11, 17.00 Braziliaanse tijd)', frase: 'IK BEN ERBIJ', titulo: ['BAZUINEN', 'en', 'FEESTEN'], data: 'ZATERDAG 28 NOVEMBER · 17.00 UUR (BRAZILIAANSE TIJD)', igreja: 'IN EEN CHRISTELIJKE MARANATHA KERK' },
+  'nl-29':   { nome: 'Nederlands (29/11, 10:30)', frase: 'IK BEN ERBIJ', titulo: ['BAZUINEN', 'en', 'FEESTEN'], data: '29 NOVEMBER · 10:30 UUR', igreja: 'IN EEN CHRISTELIJKE MARANATHA KERK' },
+  'en':      { nome: 'English · International', frase: "I'LL BE THERE", titulo: ['TRUMPETS', 'and', 'FEASTS'], data: 'SATURDAY · NOVEMBER 28', igreja: 'AT A MARANATHA CHRISTIAN CHURCH' },
+  'en-uk':   { nome: 'English · England (28/11, 8 pm)', frase: "I'LL BE THERE", titulo: ['TRUMPETS', 'and', 'FEASTS'], data: 'SATURDAY 28 NOVEMBER · 8 PM', igreja: 'AT A CHRISTIAN MARANATHA CHURCH' },
+  'de':      { nome: 'Deutsch (29/11, 10 Uhr)', frase: 'ICH BIN DABEI', titulo: ['POSAUNEN', 'und', 'FESTE'], data: '29. NOVEMBER · 10 UHR', igreja: 'IN EINER CHRISTLICHEN GEMEINDE MARANATHA' },
+  'it':      { nome: 'Italiano (29/11, ore 10:00)', frase: 'IO CI SARÒ', titulo: ['TROMBE', 'e', 'FESTE'], data: '29 NOVEMBRE · ORE 10:00', igreja: 'IN UNA CHIESA CRISTIANA MARANATA' },
+  'es':      { nome: 'Español (29/11, 10:30 h)', frase: 'YO VOY', titulo: ['TROMPETAS', 'y', 'FIESTAS'], data: '29 DE NOVIEMBRE · 10:30 H', igreja: 'EN UNA IGLESIA CRISTIANA MARANATA' },
+};
+const UI = {
+  pt: { tit: 'Trombetas e Festas 2026', sub: 'Coloque sua foto na moldura e mostre a todos que você vai participar.', feed: 'Feed (quadrado)', dica: 'Escolha sua foto abaixo 👇', foto: '📷 Escolher minha foto', zoom: 'Zoom', mover: 'Arraste a foto para ajustar a posição.', sum: '🌎 Idioma, data e horário', l1: 'Idioma / país', l2: 'Frase', l3: 'Data e horário', l4: 'Igreja', baixar: '⬇️ Baixar imagem', comp: 'Compartilhar', d: 'Dica: use uma foto de rosto, bem iluminada. A imagem é montada no seu próprio celular, nenhuma foto é enviada para a internet.' },
+  fr: { tit: 'Trompettes et Fêtes 2026', sub: 'Mettez votre photo dans le cadre et montrez à tous que vous y serez.', feed: 'Fil (carré)', dica: 'Choisissez votre photo ci-dessous 👇', foto: '📷 Choisir ma photo', zoom: 'Zoom', mover: 'Faites glisser la photo pour ajuster la position.', sum: '🌎 Langue, date et heure', l1: 'Langue / pays', l2: 'Phrase', l3: 'Date et heure', l4: 'Église', baixar: '⬇️ Télécharger l’image', comp: 'Partager', d: 'Astuce : utilisez une photo de visage bien éclairée. L’image est créée sur votre téléphone, aucune photo n’est envoyée sur internet.' },
+  nl: { tit: 'Bazuinen en Feesten 2026', sub: 'Zet je foto in de lijst en laat iedereen zien dat je erbij bent.', feed: 'Feed (vierkant)', dica: 'Kies hieronder je foto 👇', foto: '📷 Kies mijn foto', zoom: 'Zoom', mover: 'Sleep de foto om de positie aan te passen.', sum: '🌎 Taal, datum en tijd', l1: 'Taal / land', l2: 'Zin', l3: 'Datum en tijd', l4: 'Kerk', baixar: '⬇️ Afbeelding downloaden', comp: 'Delen', d: 'Tip: gebruik een goed belichte foto van je gezicht. De afbeelding wordt op je eigen telefoon gemaakt; er wordt geen foto naar internet gestuurd.' },
+  en: { tit: 'Trumpets and Feasts 2026', sub: 'Put your photo in the frame and show everyone you will be there.', feed: 'Feed (square)', dica: 'Choose your photo below 👇', foto: '📷 Choose my photo', zoom: 'Zoom', mover: 'Drag the photo to adjust its position.', sum: '🌎 Language, date and time', l1: 'Language / country', l2: 'Phrase', l3: 'Date and time', l4: 'Church', baixar: '⬇️ Download image', comp: 'Share', d: 'Tip: use a well-lit photo of your face. The image is made on your own phone; no photo is uploaded to the internet.' },
+  de: { tit: 'Posaunen und Feste 2026', sub: 'Setze dein Foto in den Rahmen und zeige allen, dass du dabei bist.', feed: 'Feed (quadratisch)', dica: 'Wähle unten dein Foto 👇', foto: '📷 Mein Foto wählen', zoom: 'Zoom', mover: 'Ziehe das Foto, um die Position anzupassen.', sum: '🌎 Sprache, Datum und Uhrzeit', l1: 'Sprache / Land', l2: 'Satz', l3: 'Datum und Uhrzeit', l4: 'Gemeinde', baixar: '⬇️ Bild herunterladen', comp: 'Teilen', d: 'Tipp: Verwende ein gut beleuchtetes Foto deines Gesichts. Das Bild wird auf deinem eigenen Handy erstellt; kein Foto wird ins Internet geladen.' },
+  it: { tit: 'Trombe e Feste 2026', sub: 'Metti la tua foto nella cornice e mostra a tutti che ci sarai.', feed: 'Feed (quadrato)', dica: 'Scegli la tua foto qui sotto 👇', foto: '📷 Scegli la mia foto', zoom: 'Zoom', mover: 'Trascina la foto per regolare la posizione.', sum: '🌎 Lingua, data e ora', l1: 'Lingua / paese', l2: 'Frase', l3: 'Data e ora', l4: 'Chiesa', baixar: '⬇️ Scarica l’immagine', comp: 'Condividi', d: 'Consiglio: usa una foto del viso ben illuminata. L’immagine viene creata sul tuo telefono; nessuna foto viene inviata su internet.' },
+  es: { tit: 'Trompetas y Fiestas 2026', sub: 'Pon tu foto en el marco y muestra a todos que vas a participar.', feed: 'Feed (cuadrado)', dica: 'Elige tu foto abajo 👇', foto: '📷 Elegir mi foto', zoom: 'Zoom', mover: 'Arrastra la foto para ajustar la posición.', sum: '🌎 Idioma, fecha y hora', l1: 'Idioma / país', l2: 'Frase', l3: 'Fecha y hora', l4: 'Iglesia', baixar: '⬇️ Descargar imagen', comp: 'Compartir', d: 'Consejo: usa una foto de tu rostro bien iluminada. La imagen se crea en tu propio teléfono; ninguna foto se envía a internet.' },
+};
+function interface_(k) {
+  const u = UI[k.slice(0, 2)] || UI.pt, set = (id, t) => { const e = document.getElementById(id); if (e) e.textContent = t; };
+  document.documentElement.lang = k.slice(0, 2); set('t_h1', VERSOES[k].frase.replace(/^(.)(.*)$/, (m, a, b) => a + b.toLowerCase()) + '!');
+  set('t_tit', u.tit); set('t_sub', u.sub); set('t_feed', u.feed); set('dica', u.dica); set('t_foto', u.foto); set('t_zoom', u.zoom); set('mover', u.mover);
+  set('t_sum', u.sum); set('t_l1', u.l1); set('t_l2', u.l2); set('t_l3', u.l3); set('t_l4', u.l4); set('baixar', u.baixar); set('compartilhar', u.comp); set('t_dica', u.d);
+}
+const GOLD = '#f0cc78', CLARO = '#e1eef8';
 const tela = document.getElementById('tela'), ctx = tela.getContext('2d');
 const dica = document.getElementById('dica'), zoom = document.getElementById('zoom');
 const baixar = document.getElementById('baixar'), compartilhar = document.getElementById('compartilhar');
-let formato = '1x1', foto = null, img = {};
-let est = { s: 1, x: 0, y: 0 };   // escala extra e deslocamento (px da moldura) da foto
-
+const selV = document.getElementById('versao'), inFrase = document.getElementById('frase'), inData = document.getElementById('data'), inIgreja = document.getElementById('igreja');
+let formato = '1x1', foto = null, img = {}, versao = 'pt-br';
+let est = { s: 1, x: 0, y: 0 };
+const titPT = new Image(); titPT.onload = desenhar; titPT.src = 'titulo_pt.png';
 for (const [k, m] of Object.entries(MOLDURAS)) { const i = new Image(); i.onload = desenhar; i.src = m.src; img[k] = i; }
 
-function base() {              // escala que faz a foto cobrir a janela
+for (const [k, v] of Object.entries(VERSOES)) { const o = document.createElement('option'); o.value = k; o.textContent = v.nome; selV.appendChild(o); }
+function aplicarVersao(k) {
+  versao = k; const v = VERSOES[k]; selV.value = k;
+  inFrase.value = v.frase; inData.value = v.data; inIgreja.value = v.igreja; interface_(k); desenhar();
+}
+selV.onchange = () => aplicarVersao(selV.value);
+[inFrase, inData, inIgreja].forEach(i => i.oninput = desenhar);
+const pedido = new URLSearchParams(location.search).get('lang');      // ex.: ?lang=fr-10 abre já em francês
+if (pedido && VERSOES[pedido]) document.getElementById('textos').open = true;
+aplicarVersao(VERSOES[pedido] ? pedido : 'pt-br');
+document.fonts && document.fonts.ready.then(desenhar);
+Promise.all(['700 40px Tinos', '400 40px Tinos', '600 40px "Barlow Condensed"', '500 40px "Barlow Condensed"'].map(f => document.fonts.load(f))).then(desenhar).catch(() => {});
+
+// texto com espaçamento entre letras (centralizado), reduzindo a fonte se passar da largura máxima
+function espacado(txt, cx, cy, fonte, tam, track, cor, maxw) {
+  let s = tam, w;
+  do { ctx.font = fonte.replace('{s}', s + 'px'); w = [...txt].reduce((a, c) => a + ctx.measureText(c).width, 0) + track * s * (txt.length - 1); s -= 1; } while (w > maxw && s > 10);
+  let x = cx - w / 2; ctx.fillStyle = cor; ctx.textBaseline = 'middle';
+  for (const c of txt) { ctx.fillText(c, x, cy); x += ctx.measureText(c).width + track * (s + 1); }
+  return w;
+}
+function ajusta(txt, fonte, tam, maxw) { let s = tam; do { ctx.font = fonte.replace('{s}', s + 'px'); s -= 1; } while (ctx.measureText(txt).width > maxw && s > 10); return s + 1; }
+
+function textos() {
+  const m = MOLDURAS[formato], L = m.L, W = m.w, v = VERSOES[versao];
+  ctx.save(); ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  // frase principal (serifa do título) com sombra suave
+  const fr = (inFrase.value || '').toUpperCase(), s = ajusta(fr, '700 {s} Tinos', L.eu_s, W - 100);
+  ctx.font = `700 ${s}px Tinos`; ctx.shadowColor = 'rgba(0,0,0,.55)'; ctx.shadowBlur = 18; ctx.shadowOffsetY = 8;
+  ctx.fillStyle = '#fff'; ctx.fillText(fr, W / 2, L.eu_y); ctx.restore();
+  // data e horário entre filetes dourados
+  ctx.save(); ctx.textAlign = 'left';
+  const w = espacado((inData.value || '').toUpperCase(), W / 2, L.dt_y, '600 {s} "Barlow Condensed"', L.dt_s, .12, GOLD, W - 2 * (L.ln + 70));
+  ctx.strokeStyle = GOLD; ctx.lineWidth = 3;
+  for (const sg of [-1, 1]) { const x0 = W / 2 + sg * (w / 2 + 26); ctx.beginPath(); ctx.moveTo(x0, L.dt_y); ctx.lineTo(x0 + sg * L.ln, L.dt_y); ctx.stroke(); }
+  // título do evento: arte oficial em português, texto na mesma serifa nos outros idiomas
+  if (v.titulo === 'pt') {
+    if (titPT.complete && titPT.naturalWidth) ctx.drawImage(titPT, W / 2 - L.ti_w / 2, L.ti_y, L.ti_w, L.ti_w * titPT.naturalHeight / titPT.naturalWidth);
+  } else {
+    const [l1, cj, l2] = v.titulo, h = L.ti_w * 0.488;
+    ctx.textAlign = 'center'; ctx.fillStyle = '#fff'; ctx.textBaseline = 'alphabetic';
+    let s1 = ajusta(l1, '400 {s} Tinos', h * 0.36, L.ti_w * 1.1); ctx.font = `400 ${s1}px Tinos`; ctx.fillText(l1, W / 2, L.ti_y + h * 0.30);
+    let s2 = ajusta(cj + ' ' + l2, '700 {s} Tinos', h * 0.48, L.ti_w * 1.1); ctx.font = `700 ${s2}px Tinos`; ctx.fillText(cj + ' ' + l2, W / 2, L.ti_y + h * 0.74);
+    ctx.textAlign = 'left'; const wy = espacado('2026', W / 2, L.ti_y + h * 0.92, '500 {s} "Barlow Condensed"', h * 0.11, .9, '#fff', L.ti_w);
+    ctx.strokeStyle = '#fff'; ctx.lineWidth = 2;
+    for (const sg of [-1, 1]) { const x0 = W / 2 + sg * (wy / 2 + L.ti_w * .08); ctx.beginPath(); ctx.moveTo(x0, L.ti_y + h * 0.92); ctx.lineTo(x0 + sg * L.ti_w * .22, L.ti_y + h * 0.92); ctx.stroke(); }
+  }
+  // igreja
+  espacado((inIgreja.value || '').toUpperCase(), W / 2, L.ig_y, '500 {s} "Barlow Condensed"', L.ig_s, .14, CLARO, W - 80);
+  ctx.restore();
+}
+
+function base() {
   const [x0, y0, x1, y1] = MOLDURAS[formato].win;
   return Math.max((x1 - x0) / foto.width, (y1 - y0) / foto.height);
 }
@@ -98,9 +202,10 @@ function desenhar() {
     const cx = (x0 + x1) / 2 + est.x, cy = (y0 + y1) / 2 + est.y;
     ctx.drawImage(foto, cx - w / 2, cy - h / 2, w, h);
   }
-  if (img[formato] && img[formato].complete) ctx.drawImage(img[formato], 0, 0, m.w, m.h);
+  if (img[formato] && img[formato].complete && img[formato].naturalWidth) ctx.drawImage(img[formato], 0, 0, m.w, m.h);
+  textos();
 }
-function limitar() {           // não deixa aparecer buraco na janela
+function limitar() {
   const [x0, y0, x1, y1] = MOLDURAS[formato].win, k = base() * est.s;
   const mx = Math.max(0, (foto.width * k - (x1 - x0)) / 2), my = Math.max(0, (foto.height * k - (y1 - y0)) / 2);
   est.x = Math.min(mx, Math.max(-mx, est.x)); est.y = Math.min(my, Math.max(-my, est.y));
@@ -125,7 +230,6 @@ document.getElementById('arquivo').onchange = e => {
 };
 zoom.oninput = () => { if (!foto) return; est.s = +zoom.value; limitar(); desenhar(); };
 
-// arrastar (mouse ou dedo) e pinça com dois dedos
 const ptrs = new Map(); let ini = null;
 function escalaTela() { return tela.width / tela.getBoundingClientRect().width; }
 tela.addEventListener('pointerdown', e => { if (!foto) return; tela.setPointerCapture(e.pointerId); ptrs.set(e.pointerId, { x: e.clientX, y: e.clientY }); ini = null; });
@@ -148,7 +252,7 @@ baixar.onclick = () => arquivoFinal(f => {
   document.body.appendChild(a); a.click(); a.remove();
 });
 compartilhar.onclick = () => arquivoFinal(f => {
-  if (navigator.canShare && navigator.canShare({ files: [f] })) navigator.share({ files: [f], title: 'Eu vou! Trombetas e Festas 2026' }).catch(() => {});
+  if (navigator.canShare && navigator.canShare({ files: [f] })) navigator.share({ files: [f], title: 'Trombetas e Festas 2026' }).catch(() => {});
 });
 </script>
 </body>
