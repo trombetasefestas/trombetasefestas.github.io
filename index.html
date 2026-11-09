@@ -76,6 +76,12 @@
     <div class="zoom hidden" id="zoomBox"><span id="t_zoom">Zoom</span><input type="range" id="zoom" min="1" max="3" step="0.01" value="1"></div>
     <p class="orient hidden" id="mover">Arraste a foto para ajustar a posição.</p>
 
+    <div class="campo hidden" id="fusoBox" style="margin-top:0"><span>🕔 Horário na sua região</span><select id="fuso">
+      <option value="17">Horário de Brasília · 17h</option>
+      <option value="16">AM, MT, MS, RO, RR · 16h</option>
+      <option value="15">Acre · 15h</option>
+      <option value="18">Fernando de Noronha · 18h</option>
+    </select></div>
     <details class="textos" id="textos">
       <summary id="t_sum">🌎 Idioma, data e horário</summary>
       <div class="campo"><span id="t_l1">Idioma / país</span><select id="versao"></select></div>
@@ -178,7 +184,10 @@ function bandeira(code, x, y, h) {
 }
 const pedido = new URLSearchParams(location.search).get('lang');      // ex.: ?lang=fr-10 abre já em francês
 if (pedido && VERSOES[pedido]) document.getElementById('textos').open = true;
-if (!pedido || pedido === 'pt-br') document.getElementById('textos').classList.add('hidden');   // link principal (Brasil): textos fixos
+if (!pedido || pedido === 'pt-br') {                                  // link principal (Brasil): textos fixos, só o horário muda com o fuso
+  document.getElementById('textos').classList.add('hidden'); document.getElementById('fusoBox').classList.remove('hidden');
+  document.getElementById('fuso').onchange = e => { inData.value = '28 DE NOVEMBRO · SÁBADO · ' + e.target.value + 'H'; desenhar(); };
+}
 aplicarVersao(VERSOES[pedido] ? pedido : 'pt-br');
 document.fonts && document.fonts.ready.then(desenhar);
 Promise.all(['700 40px Tinos', '400 40px Tinos', '600 40px "Barlow Condensed"', '500 40px "Barlow Condensed"'].map(f => document.fonts.load(f))).then(desenhar).catch(() => {});
