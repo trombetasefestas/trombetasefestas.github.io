@@ -81,6 +81,7 @@
       <div class="campo"><span id="t_l1">Idioma / país</span><select id="versao"></select></div>
       <div class="campo"><span id="t_l2">Frase</span><input id="frase" maxlength="22"></div>
       <div class="campo"><span id="t_l3">Data e horário</span><input id="data" maxlength="60"></div>
+      <div class="campo"><span id="t_l5">Bandeira</span><select id="band"></select></div>
       <div class="campo"><span id="t_l4">Igreja</span><input id="igreja" maxlength="60"></div>
     </details>
 
@@ -99,39 +100,39 @@ const MOLDURAS = {
 };
 // versões por idioma/país (os campos ficam editáveis); título 'pt' usa a arte oficial
 const VERSOES = {
-  'pt-br':   { nome: 'Português · Brasil (28/11, 17h)', frase: 'EU VOU', titulo: 'pt', data: '28 DE NOVEMBRO · SÁBADO · 17H', igreja: 'EM UMA IGREJA CRISTÃ MARANATA' },
-  'pt-pt':   { nome: 'Português · Portugal (28/11, 20h)', frase: 'EU VOU', titulo: 'pt', data: '28 DE NOVEMBRO · SÁBADO · 20H', igreja: 'EM UMA IGREJA CRISTÃ MARANATA' },
-  'fr-28':   { nome: 'Français (28/11, 17h Brasília)', frase: "J'Y SERAI", titulo: ['TROMPETTES', 'et', 'FÊTES'], data: 'SAMEDI 28 NOVEMBRE · 17H00 (HEURE DE BRASÍLIA)', igreja: 'DANS UNE ÉGLISE CHRÉTIENNE MARANATHA' },
-  'fr-10':   { nome: 'Français (29/11, 10h)', frase: "J'Y SERAI", titulo: ['TROMPETTES', 'et', 'FÊTES'], data: 'DIMANCHE 29 NOVEMBRE · 10H', igreja: 'DANS UNE ÉGLISE CHRÉTIENNE MARANATHA' },
-  'fr-1030': { nome: 'Français (29/11, 10h30)', frase: "J'Y SERAI", titulo: ['TROMPETTES', 'et', 'FÊTES'], data: 'DIMANCHE 29 NOVEMBRE · 10H30', igreja: 'DANS UNE ÉGLISE CHRÉTIENNE MARANATHA' },
-  'nl-28':   { nome: 'Nederlands (28/11, 17.00 Braziliaanse tijd)', frase: 'IK BEN ERBIJ', titulo: ['BAZUINEN', 'en', 'FEESTEN'], data: 'ZATERDAG 28 NOVEMBER · 17.00 UUR (BRAZILIAANSE TIJD)', igreja: 'IN EEN CHRISTELIJKE MARANATHA KERK' },
-  'nl-29':   { nome: 'Nederlands (29/11, 10:30)', frase: 'IK BEN ERBIJ', titulo: ['BAZUINEN', 'en', 'FEESTEN'], data: '29 NOVEMBER · 10:30 UUR', igreja: 'IN EEN CHRISTELIJKE MARANATHA KERK' },
-  'en':      { nome: 'English · International', frase: "I'LL BE THERE", titulo: ['TRUMPETS', 'and', 'FEASTS'], data: 'SATURDAY · NOVEMBER 28', igreja: 'AT A MARANATHA CHRISTIAN CHURCH' },
-  'en-uk':   { nome: 'English · England (28/11, 8 pm)', frase: "I'LL BE THERE", titulo: ['TRUMPETS', 'and', 'FEASTS'], data: 'SATURDAY 28 NOVEMBER · 8 PM', igreja: 'AT A CHRISTIAN MARANATHA CHURCH' },
-  'de':      { nome: 'Deutsch (29/11, 10 Uhr)', frase: 'ICH BIN DABEI', titulo: ['POSAUNEN', 'und', 'FESTE'], data: '29. NOVEMBER · 10 UHR', igreja: 'IN EINER CHRISTLICHEN GEMEINDE MARANATHA' },
-  'it':      { nome: 'Italiano (29/11, ore 10:00)', frase: 'IO CI SARÒ', titulo: ['TROMBE', 'e', 'FESTE'], data: '29 NOVEMBRE · ORE 10:00', igreja: 'IN UNA CHIESA CRISTIANA MARANATA' },
-  'es':      { nome: 'Español (29/11, 10:30 h)', frase: 'YO VOY', titulo: ['TROMPETAS', 'y', 'FIESTAS'], data: '29 DE NOVIEMBRE · 10:30 H', igreja: 'EN UNA IGLESIA CRISTIANA MARANATA' },
+  'pt-br':   { band: '', nome: 'Português · Brasil (28/11, 17h)', frase: 'EU VOU', titulo: 'pt', data: '28 DE NOVEMBRO · SÁBADO · 17H', igreja: 'EM UMA IGREJA CRISTÃ MARANATA' },
+  'pt-pt':   { band: 'PT', nome: 'Português · Portugal (28/11, 20h)', frase: 'EU VOU', titulo: 'pt', data: '28 DE NOVEMBRO · SÁBADO · 20H', igreja: 'EM UMA IGREJA CRISTÃ MARANATA' },
+  'fr-28':   { band: 'FR', nome: 'Français (28/11, 17h Brasília)', frase: "J'Y SERAI", titulo: ['TROMPETTES', 'et', 'FÊTES'], data: 'SAMEDI 28 NOVEMBRE · 17H00 (HEURE DE BRASÍLIA)', igreja: 'DANS UNE ÉGLISE CHRÉTIENNE MARANATHA' },
+  'fr-10':   { band: 'FR', nome: 'Français (29/11, 10h)', frase: "J'Y SERAI", titulo: ['TROMPETTES', 'et', 'FÊTES'], data: 'DIMANCHE 29 NOVEMBRE · 10H', igreja: 'DANS UNE ÉGLISE CHRÉTIENNE MARANATHA' },
+  'fr-1030': { band: 'FR', nome: 'Français (29/11, 10h30)', frase: "J'Y SERAI", titulo: ['TROMPETTES', 'et', 'FÊTES'], data: 'DIMANCHE 29 NOVEMBRE · 10H30', igreja: 'DANS UNE ÉGLISE CHRÉTIENNE MARANATHA' },
+  'nl-28':   { band: 'NL', nome: 'Nederlands (28/11, 17.00 Braziliaanse tijd)', frase: 'IK BEN ERBIJ', titulo: ['BAZUINEN', 'en', 'FEESTEN'], data: 'ZATERDAG 28 NOVEMBER · 17.00 UUR (BRAZILIAANSE TIJD)', igreja: 'IN EEN CHRISTELIJKE MARANATHA KERK' },
+  'nl-29':   { band: 'NL', nome: 'Nederlands (29/11, 10:30)', frase: 'IK BEN ERBIJ', titulo: ['BAZUINEN', 'en', 'FEESTEN'], data: '29 NOVEMBER · 10:30 UUR', igreja: 'IN EEN CHRISTELIJKE MARANATHA KERK' },
+  'en':      { band: '', nome: 'English · International', frase: "I'LL BE THERE", titulo: ['TRUMPETS', 'and', 'FEASTS'], data: 'SATURDAY · NOVEMBER 28', igreja: 'AT A MARANATHA CHRISTIAN CHURCH' },
+  'en-uk':   { band: 'GB', nome: 'English · England (28/11, 8 pm)', frase: "I'LL BE THERE", titulo: ['TRUMPETS', 'and', 'FEASTS'], data: 'SATURDAY 28 NOVEMBER · 8 PM', igreja: 'AT A CHRISTIAN MARANATHA CHURCH' },
+  'de':      { band: 'DE', nome: 'Deutsch (29/11, 10 Uhr)', frase: 'ICH BIN DABEI', titulo: ['POSAUNEN', 'und', 'FESTE'], data: '29. NOVEMBER · 10 UHR', igreja: 'IN EINER CHRISTLICHEN GEMEINDE MARANATHA' },
+  'it':      { band: 'IT', nome: 'Italiano (29/11, ore 10:00)', frase: 'IO CI SARÒ', titulo: ['TROMBE', 'e', 'FESTE'], data: '29 NOVEMBRE · ORE 10:00', igreja: 'IN UNA CHIESA CRISTIANA MARANATA' },
+  'es':      { band: 'ES', nome: 'Español (29/11, 10:30 h)', frase: 'YO VOY', titulo: ['TROMPETAS', 'y', 'FIESTAS'], data: '29 DE NOVIEMBRE · 10:30 H', igreja: 'EN UNA IGLESIA CRISTIANA MARANATA' },
 };
 const UI = {
-  pt: { tit: 'Trombetas e Festas 2026', sub: 'Coloque sua foto na moldura e mostre a todos que você vai participar.', feed: 'Feed (quadrado)', dica: 'Escolha sua foto abaixo 👇', foto: '📷 Escolher minha foto', zoom: 'Zoom', mover: 'Arraste a foto para ajustar a posição.', sum: '🌎 Idioma, data e horário', l1: 'Idioma / país', l2: 'Frase', l3: 'Data e horário', l4: 'Igreja', baixar: '⬇️ Baixar imagem', comp: 'Compartilhar', d: 'Dica: use uma foto de rosto, bem iluminada. A imagem é montada no seu próprio celular, nenhuma foto é enviada para a internet.' },
-  fr: { tit: 'Trompettes et Fêtes 2026', sub: 'Mettez votre photo dans le cadre et montrez à tous que vous y serez.', feed: 'Fil (carré)', dica: 'Choisissez votre photo ci-dessous 👇', foto: '📷 Choisir ma photo', zoom: 'Zoom', mover: 'Faites glisser la photo pour ajuster la position.', sum: '🌎 Langue, date et heure', l1: 'Langue / pays', l2: 'Phrase', l3: 'Date et heure', l4: 'Église', baixar: '⬇️ Télécharger l’image', comp: 'Partager', d: 'Astuce : utilisez une photo de visage bien éclairée. L’image est créée sur votre téléphone, aucune photo n’est envoyée sur internet.' },
-  nl: { tit: 'Bazuinen en Feesten 2026', sub: 'Zet je foto in de lijst en laat iedereen zien dat je erbij bent.', feed: 'Feed (vierkant)', dica: 'Kies hieronder je foto 👇', foto: '📷 Kies mijn foto', zoom: 'Zoom', mover: 'Sleep de foto om de positie aan te passen.', sum: '🌎 Taal, datum en tijd', l1: 'Taal / land', l2: 'Zin', l3: 'Datum en tijd', l4: 'Kerk', baixar: '⬇️ Afbeelding downloaden', comp: 'Delen', d: 'Tip: gebruik een goed belichte foto van je gezicht. De afbeelding wordt op je eigen telefoon gemaakt; er wordt geen foto naar internet gestuurd.' },
-  en: { tit: 'Trumpets and Feasts 2026', sub: 'Put your photo in the frame and show everyone you will be there.', feed: 'Feed (square)', dica: 'Choose your photo below 👇', foto: '📷 Choose my photo', zoom: 'Zoom', mover: 'Drag the photo to adjust its position.', sum: '🌎 Language, date and time', l1: 'Language / country', l2: 'Phrase', l3: 'Date and time', l4: 'Church', baixar: '⬇️ Download image', comp: 'Share', d: 'Tip: use a well-lit photo of your face. The image is made on your own phone; no photo is uploaded to the internet.' },
-  de: { tit: 'Posaunen und Feste 2026', sub: 'Setze dein Foto in den Rahmen und zeige allen, dass du dabei bist.', feed: 'Feed (quadratisch)', dica: 'Wähle unten dein Foto 👇', foto: '📷 Mein Foto wählen', zoom: 'Zoom', mover: 'Ziehe das Foto, um die Position anzupassen.', sum: '🌎 Sprache, Datum und Uhrzeit', l1: 'Sprache / Land', l2: 'Satz', l3: 'Datum und Uhrzeit', l4: 'Gemeinde', baixar: '⬇️ Bild herunterladen', comp: 'Teilen', d: 'Tipp: Verwende ein gut beleuchtetes Foto deines Gesichts. Das Bild wird auf deinem eigenen Handy erstellt; kein Foto wird ins Internet geladen.' },
-  it: { tit: 'Trombe e Feste 2026', sub: 'Metti la tua foto nella cornice e mostra a tutti che ci sarai.', feed: 'Feed (quadrato)', dica: 'Scegli la tua foto qui sotto 👇', foto: '📷 Scegli la mia foto', zoom: 'Zoom', mover: 'Trascina la foto per regolare la posizione.', sum: '🌎 Lingua, data e ora', l1: 'Lingua / paese', l2: 'Frase', l3: 'Data e ora', l4: 'Chiesa', baixar: '⬇️ Scarica l’immagine', comp: 'Condividi', d: 'Consiglio: usa una foto del viso ben illuminata. L’immagine viene creata sul tuo telefono; nessuna foto viene inviata su internet.' },
-  es: { tit: 'Trompetas y Fiestas 2026', sub: 'Pon tu foto en el marco y muestra a todos que vas a participar.', feed: 'Feed (cuadrado)', dica: 'Elige tu foto abajo 👇', foto: '📷 Elegir mi foto', zoom: 'Zoom', mover: 'Arrastra la foto para ajustar la posición.', sum: '🌎 Idioma, fecha y hora', l1: 'Idioma / país', l2: 'Frase', l3: 'Fecha y hora', l4: 'Iglesia', baixar: '⬇️ Descargar imagen', comp: 'Compartir', d: 'Consejo: usa una foto de tu rostro bien iluminada. La imagen se crea en tu propio teléfono; ninguna foto se envía a internet.' },
+  pt: { l5: 'Bandeira', tit: 'Trombetas e Festas 2026', sub: 'Coloque sua foto na moldura e mostre a todos que você vai participar.', feed: 'Feed (quadrado)', dica: 'Escolha sua foto abaixo 👇', foto: '📷 Escolher minha foto', zoom: 'Zoom', mover: 'Arraste a foto para ajustar a posição.', sum: '🌎 Idioma, data e horário', l1: 'Idioma / país', l2: 'Frase', l3: 'Data e horário', l4: 'Igreja', baixar: '⬇️ Baixar imagem', comp: 'Compartilhar', d: 'Dica: use uma foto de rosto, bem iluminada. A imagem é montada no seu próprio celular, nenhuma foto é enviada para a internet.' },
+  fr: { l5: 'Drapeau', tit: 'Trompettes et Fêtes 2026', sub: 'Mettez votre photo dans le cadre et montrez à tous que vous y serez.', feed: 'Fil (carré)', dica: 'Choisissez votre photo ci-dessous 👇', foto: '📷 Choisir ma photo', zoom: 'Zoom', mover: 'Faites glisser la photo pour ajuster la position.', sum: '🌎 Langue, date et heure', l1: 'Langue / pays', l2: 'Phrase', l3: 'Date et heure', l4: 'Église', baixar: '⬇️ Télécharger l’image', comp: 'Partager', d: 'Astuce : utilisez une photo de visage bien éclairée. L’image est créée sur votre téléphone, aucune photo n’est envoyée sur internet.' },
+  nl: { l5: 'Vlag', tit: 'Bazuinen en Feesten 2026', sub: 'Zet je foto in de lijst en laat iedereen zien dat je erbij bent.', feed: 'Feed (vierkant)', dica: 'Kies hieronder je foto 👇', foto: '📷 Kies mijn foto', zoom: 'Zoom', mover: 'Sleep de foto om de positie aan te passen.', sum: '🌎 Taal, datum en tijd', l1: 'Taal / land', l2: 'Zin', l3: 'Datum en tijd', l4: 'Kerk', baixar: '⬇️ Afbeelding downloaden', comp: 'Delen', d: 'Tip: gebruik een goed belichte foto van je gezicht. De afbeelding wordt op je eigen telefoon gemaakt; er wordt geen foto naar internet gestuurd.' },
+  en: { l5: 'Flag', tit: 'Trumpets and Feasts 2026', sub: 'Put your photo in the frame and show everyone you will be there.', feed: 'Feed (square)', dica: 'Choose your photo below 👇', foto: '📷 Choose my photo', zoom: 'Zoom', mover: 'Drag the photo to adjust its position.', sum: '🌎 Language, date and time', l1: 'Language / country', l2: 'Phrase', l3: 'Date and time', l4: 'Church', baixar: '⬇️ Download image', comp: 'Share', d: 'Tip: use a well-lit photo of your face. The image is made on your own phone; no photo is uploaded to the internet.' },
+  de: { l5: 'Flagge', tit: 'Posaunen und Feste 2026', sub: 'Setze dein Foto in den Rahmen und zeige allen, dass du dabei bist.', feed: 'Feed (quadratisch)', dica: 'Wähle unten dein Foto 👇', foto: '📷 Mein Foto wählen', zoom: 'Zoom', mover: 'Ziehe das Foto, um die Position anzupassen.', sum: '🌎 Sprache, Datum und Uhrzeit', l1: 'Sprache / Land', l2: 'Satz', l3: 'Datum und Uhrzeit', l4: 'Gemeinde', baixar: '⬇️ Bild herunterladen', comp: 'Teilen', d: 'Tipp: Verwende ein gut beleuchtetes Foto deines Gesichts. Das Bild wird auf deinem eigenen Handy erstellt; kein Foto wird ins Internet geladen.' },
+  it: { l5: 'Bandiera', tit: 'Trombe e Feste 2026', sub: 'Metti la tua foto nella cornice e mostra a tutti che ci sarai.', feed: 'Feed (quadrato)', dica: 'Scegli la tua foto qui sotto 👇', foto: '📷 Scegli la mia foto', zoom: 'Zoom', mover: 'Trascina la foto per regolare la posizione.', sum: '🌎 Lingua, data e ora', l1: 'Lingua / paese', l2: 'Frase', l3: 'Data e ora', l4: 'Chiesa', baixar: '⬇️ Scarica l’immagine', comp: 'Condividi', d: 'Consiglio: usa una foto del viso ben illuminata. L’immagine viene creata sul tuo telefono; nessuna foto viene inviata su internet.' },
+  es: { l5: 'Bandera', tit: 'Trompetas y Fiestas 2026', sub: 'Pon tu foto en el marco y muestra a todos que vas a participar.', feed: 'Feed (cuadrado)', dica: 'Elige tu foto abajo 👇', foto: '📷 Elegir mi foto', zoom: 'Zoom', mover: 'Arrastra la foto para ajustar la posición.', sum: '🌎 Idioma, fecha y hora', l1: 'Idioma / país', l2: 'Frase', l3: 'Fecha y hora', l4: 'Iglesia', baixar: '⬇️ Descargar imagen', comp: 'Compartir', d: 'Consejo: usa una foto de tu rostro bien iluminada. La imagen se crea en tu propio teléfono; ninguna foto se envía a internet.' },
 };
 function interface_(k) {
   const u = UI[k.slice(0, 2)] || UI.pt, set = (id, t) => { const e = document.getElementById(id); if (e) e.textContent = t; };
   document.documentElement.lang = k.slice(0, 2); set('t_h1', VERSOES[k].frase.replace(/^(.)(.*)$/, (m, a, b) => a + b.toLowerCase()) + '!');
   set('t_tit', u.tit); set('t_sub', u.sub); set('t_feed', u.feed); set('dica', u.dica); set('t_foto', u.foto); set('t_zoom', u.zoom); set('mover', u.mover);
-  set('t_sum', u.sum); set('t_l1', u.l1); set('t_l2', u.l2); set('t_l3', u.l3); set('t_l4', u.l4); set('baixar', u.baixar); set('compartilhar', u.comp); set('t_dica', u.d);
+  set('t_sum', u.sum); set('t_l1', u.l1); set('t_l2', u.l2); set('t_l3', u.l3); set('t_l4', u.l4); set('t_l5', u.l5); set('baixar', u.baixar); set('compartilhar', u.comp); set('t_dica', u.d);
 }
 const GOLD = '#f0cc78', CLARO = '#e1eef8';
 const tela = document.getElementById('tela'), ctx = tela.getContext('2d');
 const dica = document.getElementById('dica'), zoom = document.getElementById('zoom');
 const baixar = document.getElementById('baixar'), compartilhar = document.getElementById('compartilhar');
-const selV = document.getElementById('versao'), inFrase = document.getElementById('frase'), inData = document.getElementById('data'), inIgreja = document.getElementById('igreja');
+const selB = document.getElementById('band'), selV = document.getElementById('versao'), inFrase = document.getElementById('frase'), inData = document.getElementById('data'), inIgreja = document.getElementById('igreja');
 let formato = '1x1', foto = null, img = {}, versao = 'pt-br';
 let est = { s: 1, x: 0, y: 0 };
 const titPT = new Image(); titPT.onload = desenhar; titPT.src = 'titulo_pt.png';
@@ -140,10 +141,38 @@ for (const [k, m] of Object.entries(MOLDURAS)) { const i = new Image(); i.onload
 for (const [k, v] of Object.entries(VERSOES)) { const o = document.createElement('option'); o.value = k; o.textContent = v.nome; selV.appendChild(o); }
 function aplicarVersao(k) {
   versao = k; const v = VERSOES[k]; selV.value = k;
-  inFrase.value = v.frase; inData.value = v.data; inIgreja.value = v.igreja; interface_(k); desenhar();
+  inFrase.value = v.frase; inData.value = v.data; inIgreja.value = v.igreja; selB.value = v.band || ''; interface_(k); desenhar();
 }
 selV.onchange = () => aplicarVersao(selV.value);
-[inFrase, inData, inIgreja].forEach(i => i.oninput = desenhar);
+[inFrase, inData, inIgreja].forEach(i => i.oninput = desenhar); selB.onchange = desenhar;
+// bandeiras desenhadas no próprio canvas (funciona em qualquer celular, sem depender de emoji)
+const BANDEIRAS = { '': '—', PT: 'Portugal', FR: 'France', BE: 'Belgique', CH: 'Suisse / Schweiz', NL: 'Nederland', GB: 'United Kingdom', IE: 'Ireland', US: 'United States', DE: 'Deutschland', AT: 'Österreich', IT: 'Italia', ES: 'España' };
+for (const [k, n] of Object.entries(BANDEIRAS)) { const o = document.createElement('option'); o.value = k; o.textContent = n; selB.appendChild(o); }
+function bandeira(code, x, y, h) {
+  const w = h * 1.5; ctx.save(); ctx.beginPath(); ctx.roundRect ? ctx.roundRect(x, y, w, h, h * .12) : ctx.rect(x, y, w, h); ctx.clip();
+  const vert = cs => cs.forEach((c, i) => { ctx.fillStyle = c; ctx.fillRect(x + w * i / cs.length, y, w / cs.length + 1, h); });
+  const hor = (cs, ps) => { let yy = y; cs.forEach((c, i) => { const hh = h * (ps ? ps[i] : 1 / cs.length); ctx.fillStyle = c; ctx.fillRect(x, yy, w, hh + 1); yy += hh; }); };
+  if (code === 'PT') { ctx.fillStyle = '#da291c'; ctx.fillRect(x, y, w, h); ctx.fillStyle = '#046a38'; ctx.fillRect(x, y, w * .4, h);
+    ctx.fillStyle = '#ffe900'; ctx.beginPath(); ctx.arc(x + w * .4, y + h / 2, h * .26, 0, 7); ctx.fill(); ctx.fillStyle = '#da291c'; ctx.beginPath(); ctx.arc(x + w * .4, y + h / 2, h * .15, 0, 7); ctx.fill(); }
+  else if (code === 'FR') vert(['#002395', '#fff', '#ed2939']);
+  else if (code === 'BE') vert(['#000', '#fdda24', '#ef3340']);
+  else if (code === 'IT') vert(['#009246', '#fff', '#ce2b37']);
+  else if (code === 'IE') vert(['#169b62', '#fff', '#ff883e']);
+  else if (code === 'NL') hor(['#ae1c28', '#fff', '#21468b']);
+  else if (code === 'DE') hor(['#000', '#dd0000', '#ffce00']);
+  else if (code === 'AT') hor(['#c8102e', '#fff', '#c8102e']);
+  else if (code === 'ES') hor(['#aa151b', '#f1bf00', '#aa151b'], [.25, .5, .25]);
+  else if (code === 'CH') { ctx.fillStyle = '#da291c'; ctx.fillRect(x, y, w, h); ctx.fillStyle = '#fff'; const c = h * .2; ctx.fillRect(x + w / 2 - c / 2, y + h * .2, c, h * .6); ctx.fillRect(x + w / 2 - h * .3, y + h / 2 - c / 2, h * .6, c); }
+  else if (code === 'US') { for (let i = 0; i < 13; i++) { ctx.fillStyle = i % 2 ? '#fff' : '#b22234'; ctx.fillRect(x, y + h * i / 13, w, h / 13 + 1); } ctx.fillStyle = '#3c3b6e'; ctx.fillRect(x, y, w * .4, h * 7 / 13); }
+  else if (code === 'GB') { ctx.fillStyle = '#012169'; ctx.fillRect(x, y, w, h); ctx.lineCap = 'butt';
+    const diag = (lw, c) => { ctx.strokeStyle = c; ctx.lineWidth = lw; ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x + w, y + h); ctx.moveTo(x + w, y); ctx.lineTo(x, y + h); ctx.stroke(); };
+    diag(h * .2, '#fff'); diag(h * .08, '#c8102e');
+    ctx.fillStyle = '#fff'; ctx.fillRect(x + w / 2 - h * .17, y, h * .34, h); ctx.fillRect(x, y + h / 2 - h * .17, w, h * .34);
+    ctx.fillStyle = '#c8102e'; ctx.fillRect(x + w / 2 - h * .1, y, h * .2, h); ctx.fillRect(x, y + h / 2 - h * .1, w, h * .2); }
+  ctx.restore(); ctx.save(); ctx.strokeStyle = 'rgba(255,255,255,.85)'; ctx.lineWidth = Math.max(1.5, h * .05); ctx.beginPath();
+  ctx.roundRect ? ctx.roundRect(x, y, w, h, h * .12) : ctx.rect(x, y, w, h); ctx.stroke(); ctx.restore();
+  return w;
+}
 const pedido = new URLSearchParams(location.search).get('lang');      // ex.: ?lang=fr-10 abre já em francês
 if (pedido && VERSOES[pedido]) document.getElementById('textos').open = true;
 if (!pedido || pedido === 'pt-br') document.getElementById('textos').classList.add('hidden');   // link principal (Brasil): textos fixos
@@ -152,9 +181,10 @@ document.fonts && document.fonts.ready.then(desenhar);
 Promise.all(['700 40px Tinos', '400 40px Tinos', '600 40px "Barlow Condensed"', '500 40px "Barlow Condensed"'].map(f => document.fonts.load(f))).then(desenhar).catch(() => {});
 
 // texto com espaçamento entre letras (centralizado), reduzindo a fonte se passar da largura máxima
-function espacado(txt, cx, cy, fonte, tam, track, cor, maxw) {
+function espacado(txt, cx, cy, fonte, tam, track, cor, maxw, so_medir) {
   let s = tam, w;
   do { ctx.font = fonte.replace('{s}', s + 'px'); w = [...txt].reduce((a, c) => a + ctx.measureText(c).width, 0) + track * s * (txt.length - 1); s -= 1; } while (w > maxw && s > 10);
+  if (so_medir) return w;
   let x = cx - w / 2; ctx.fillStyle = cor; ctx.textBaseline = 'middle';
   for (const c of txt) { ctx.fillText(c, x, cy); x += ctx.measureText(c).width + track * (s + 1); }
   return w;
@@ -170,7 +200,11 @@ function textos() {
   ctx.fillStyle = '#fff'; ctx.fillText(fr, W / 2, L.eu_y); ctx.restore();
   // data e horário entre filetes dourados
   ctx.save(); ctx.textAlign = 'left';
-  const w = espacado((inData.value || '').toUpperCase(), W / 2, L.dt_y, '600 {s} "Barlow Condensed"', L.dt_s, .12, GOLD, W - 2 * (L.ln + 70));
+  const dtxt = (inData.value || '').toUpperCase(), code = selB.value, fh = L.dt_s * .78, fw = code ? fh * 1.5 + L.dt_s * .4 : 0;
+  const maxw = W - 2 * (L.ln + 70) - fw, tw = espacado(dtxt, 0, 0, '600 {s} "Barlow Condensed"', L.dt_s, .12, GOLD, maxw, true);
+  if (code) bandeira(code, W / 2 - (tw + fw) / 2, L.dt_y - fh / 2, fh);
+  espacado(dtxt, W / 2 + fw / 2, L.dt_y, '600 {s} "Barlow Condensed"', L.dt_s, .12, GOLD, maxw);
+  const w = tw + fw;
   ctx.strokeStyle = GOLD; ctx.lineWidth = 3;
   for (const sg of [-1, 1]) { const x0 = W / 2 + sg * (w / 2 + 26); ctx.beginPath(); ctx.moveTo(x0, L.dt_y); ctx.lineTo(x0 + sg * L.ln, L.dt_y); ctx.stroke(); }
   // título do evento: arte oficial em português, texto na mesma serifa nos outros idiomas
