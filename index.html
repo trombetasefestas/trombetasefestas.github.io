@@ -100,7 +100,7 @@ const MOLDURAS = {
 };
 // versões por idioma/país (os campos ficam editáveis); título 'pt' usa a arte oficial
 const VERSOES = {
-  'pt-br':   { band: '', nome: 'Português · Brasil (28/11, 17h)', frase: 'EU VOU', titulo: 'pt', data: '28 DE NOVEMBRO · SÁBADO · 17H', igreja: 'EM UMA IGREJA CRISTÃ MARANATA' },
+  'pt-br':   { band: 'BR', nome: 'Português · Brasil (28/11, 17h)', frase: 'EU VOU', titulo: 'pt', data: '28 DE NOVEMBRO · SÁBADO · 17H', igreja: 'EM UMA IGREJA CRISTÃ MARANATA' },
   'pt-pt':   { band: 'PT', nome: 'Português · Portugal (28/11, 20h)', frase: 'EU VOU', titulo: 'pt', data: '28 DE NOVEMBRO · SÁBADO · 20H', igreja: 'EM UMA IGREJA CRISTÃ MARANATA' },
   'fr-28':   { band: 'FR', nome: 'Français (28/11, 17h Brasília)', frase: "J'Y SERAI", titulo: ['TROMPETTES', 'et', 'FÊTES'], data: 'SAMEDI 28 NOVEMBRE · 17H00 (HEURE DE BRASÍLIA)', igreja: 'DANS UNE ÉGLISE CHRÉTIENNE MARANATHA' },
   'fr-10':   { band: 'FR', nome: 'Français (29/11, 10h)', frase: "J'Y SERAI", titulo: ['TROMPETTES', 'et', 'FÊTES'], data: 'DIMANCHE 29 NOVEMBRE · 10H', igreja: 'DANS UNE ÉGLISE CHRÉTIENNE MARANATHA' },
@@ -146,7 +146,7 @@ function aplicarVersao(k) {
 selV.onchange = () => aplicarVersao(selV.value);
 [inFrase, inData, inIgreja].forEach(i => i.oninput = desenhar); selB.onchange = desenhar;
 // bandeiras desenhadas no próprio canvas (funciona em qualquer celular, sem depender de emoji)
-const BANDEIRAS = { '': '—', PT: 'Portugal', FR: 'France', BE: 'Belgique', CH: 'Suisse / Schweiz', NL: 'Nederland', GB: 'United Kingdom', IE: 'Ireland', US: 'United States', DE: 'Deutschland', AT: 'Österreich', IT: 'Italia', ES: 'España' };
+const BANDEIRAS = { '': '—', BR: 'Brasil', PT: 'Portugal', FR: 'France', BE: 'Belgique', CH: 'Suisse / Schweiz', NL: 'Nederland', GB: 'United Kingdom', IE: 'Ireland', US: 'United States', DE: 'Deutschland', AT: 'Österreich', IT: 'Italia', ES: 'España' };
 for (const [k, n] of Object.entries(BANDEIRAS)) { const o = document.createElement('option'); o.value = k; o.textContent = n; selB.appendChild(o); }
 function bandeira(code, x, y, h) {
   const w = h * 1.5; ctx.save(); ctx.beginPath(); ctx.roundRect ? ctx.roundRect(x, y, w, h, h * .12) : ctx.rect(x, y, w, h); ctx.clip();
@@ -154,6 +154,9 @@ function bandeira(code, x, y, h) {
   const hor = (cs, ps) => { let yy = y; cs.forEach((c, i) => { const hh = h * (ps ? ps[i] : 1 / cs.length); ctx.fillStyle = c; ctx.fillRect(x, yy, w, hh + 1); yy += hh; }); };
   if (code === 'PT') { ctx.fillStyle = '#da291c'; ctx.fillRect(x, y, w, h); ctx.fillStyle = '#046a38'; ctx.fillRect(x, y, w * .4, h);
     ctx.fillStyle = '#ffe900'; ctx.beginPath(); ctx.arc(x + w * .4, y + h / 2, h * .26, 0, 7); ctx.fill(); ctx.fillStyle = '#da291c'; ctx.beginPath(); ctx.arc(x + w * .4, y + h / 2, h * .15, 0, 7); ctx.fill(); }
+  else if (code === 'BR') { ctx.fillStyle = '#009c3b'; ctx.fillRect(x, y, w, h); ctx.fillStyle = '#ffdf00'; ctx.beginPath();
+    ctx.moveTo(x + w * .08, y + h / 2); ctx.lineTo(x + w / 2, y + h * .1); ctx.lineTo(x + w * .92, y + h / 2); ctx.lineTo(x + w / 2, y + h * .9); ctx.closePath(); ctx.fill();
+    ctx.fillStyle = '#002776'; ctx.beginPath(); ctx.arc(x + w / 2, y + h / 2, h * .22, 0, 7); ctx.fill(); }
   else if (code === 'FR') vert(['#002395', '#fff', '#ed2939']);
   else if (code === 'BE') vert(['#000', '#fdda24', '#ef3340']);
   else if (code === 'IT') vert(['#009246', '#fff', '#ce2b37']);
