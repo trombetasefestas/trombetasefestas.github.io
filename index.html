@@ -82,6 +82,8 @@
     <p class="orient hidden" id="mover">Arraste a foto para ajustar a posição.</p>
 
     <div class="campo hidden" id="fusoBox" style="margin-top:0"><span id="fusoRot">🕔 Horário na sua região</span><select id="fuso"></select></div>
+    <div class="campo hidden" id="diaBox" style="margin-top:0"><span id="diaRot">📅 Día</span><select id="diaSel"></select></div>
+    <div class="campo hidden" id="horaBox" style="margin-top:0"><span id="horaRot">🕔 Hora</span><input id="horaTxt" maxlength="20" placeholder="17:00 H"></div>
     <details class="textos" id="textos">
       <summary id="t_sum">🌎 Idioma, data e horário</summary>
       <div class="campo"><span id="t_l1">Idioma / país</span><select id="versao"></select></div>
@@ -202,6 +204,19 @@ if (chaveFuso) {
   document.getElementById('fusoRot').textContent = rot;
   for (const [v, n] of ops) { const o = document.createElement('option'); o.value = v; o.textContent = n; sel.appendChild(o); }
   sel.onchange = e => { inData.value = e.target.value; desenhar(); };
+  // espanhol: além do país, dia e hora editáveis (cada igreja local pode ter o seu horário)
+  if (chaveFuso === 'es') {
+    const dia = document.getElementById('diaSel'), hora = document.getElementById('horaTxt');
+    for (const [v, n] of [['28 DE NOVIEMBRE', 'Sábado, 28 de noviembre'], ['29 DE NOVIEMBRE', 'Domingo, 29 de noviembre']]) {
+      const o = document.createElement('option'); o.value = v; o.textContent = n; dia.appendChild(o);
+    }
+    document.getElementById('diaBox').classList.remove('hidden'); document.getElementById('horaBox').classList.remove('hidden');
+    const separar = v => { const i = v.indexOf(' · '); dia.value = v.slice(0, i); hora.value = v.slice(i + 3); };
+    const juntar = () => { inData.value = dia.value + ' · ' + (hora.value.trim().toUpperCase() || '17:00 H'); desenhar(); };
+    sel.onchange = e => { inData.value = e.target.value; separar(e.target.value); desenhar(); };
+    dia.onchange = juntar; hora.oninput = juntar;
+    separar(ops[0][0]);
+  }
 }
 aplicarVersao(VERSOES[pedido] ? pedido : 'pt-br');
 document.fonts && document.fonts.ready.then(desenhar);
