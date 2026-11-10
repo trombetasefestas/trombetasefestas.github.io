@@ -76,12 +76,7 @@
     <div class="zoom hidden" id="zoomBox"><span id="t_zoom">Zoom</span><input type="range" id="zoom" min="1" max="3" step="0.01" value="1"></div>
     <p class="orient hidden" id="mover">Arraste a foto para ajustar a posição.</p>
 
-    <div class="campo hidden" id="fusoBox" style="margin-top:0"><span>🕔 Horário na sua região</span><select id="fuso">
-      <option value="17">Horário de Brasília · 17h</option>
-      <option value="16">AM, MT, MS, RO, RR · 16h</option>
-      <option value="15">Acre · 15h</option>
-      <option value="18">Fernando de Noronha · 18h</option>
-    </select></div>
+    <div class="campo hidden" id="fusoBox" style="margin-top:0"><span id="fusoRot">🕔 Horário na sua região</span><select id="fuso"></select></div>
     <details class="textos" id="textos">
       <summary id="t_sum">🌎 Idioma, data e horário</summary>
       <div class="campo"><span id="t_l1">Idioma / país</span><select id="versao"></select></div>
@@ -117,7 +112,7 @@ const VERSOES = {
   'en-uk':   { band: 'GB', nome: 'English · England (28/11, 8 pm)', frase: "I'LL BE THERE", titulo: ['TRUMPETS', 'and', 'FEASTS'], data: 'SATURDAY 28 NOVEMBER · 8 PM', igreja: 'AT A CHRISTIAN MARANATHA CHURCH' },
   'de':      { band: 'DE', nome: 'Deutsch (29/11, 10 Uhr)', frase: 'ICH BIN DABEI', titulo: ['POSAUNEN', 'und', 'FESTE'], data: '29. NOVEMBER · 10 UHR', igreja: 'IN EINER CHRISTLICHEN GEMEINDE MARANATHA' },
   'it':      { band: 'IT', nome: 'Italiano (29/11, ore 10:00)', frase: 'IO CI SARÒ', titulo: ['TROMBE', 'e', 'FESTE'], data: '29 NOVEMBRE · ORE 10:00', igreja: 'IN UNA CHIESA CRISTIANA MARANATA' },
-  'es':      { band: 'ES', nome: 'Español (29/11, 10:30 h)', frase: 'YO VOY', titulo: ['TROMPETAS', 'y', 'FIESTAS'], data: '29 DE NOVIEMBRE · 10:30 H', igreja: 'EN UNA IGLESIA CRISTIANA MARANATA' },
+  'es':      { band: '', nome: 'Español (29/11, 10:30 h)', frase: 'YO VOY', titulo: ['TROMPETAS', 'y', 'FIESTAS'], data: '29 DE NOVIEMBRE · 10:30 H', igreja: 'EN UNA IGLESIA CRISTIANA MARANATA' },
 };
 const UI = {
   pt: { l5: 'Bandeira', tit: 'Trombetas e Festas 2026', sub: 'Coloque sua foto na moldura e mostre a todos que você vai participar.', feed: 'Feed (quadrado)', dica: 'Escolha sua foto abaixo 👇', foto: '📷 Escolher minha foto', zoom: 'Zoom', mover: 'Arraste a foto para ajustar a posição.', sum: '🌎 Idioma, data e horário', l1: 'Idioma / país', l2: 'Frase', l3: 'Data e horário', l4: 'Igreja', baixar: '⬇️ Baixar imagem', comp: 'Compartilhar', d: 'Dica: use uma foto de rosto, bem iluminada. A imagem é montada no seu próprio celular, nenhuma foto é enviada para a internet.' },
@@ -184,9 +179,23 @@ function bandeira(code, x, y, h) {
 }
 const pedido = new URLSearchParams(location.search).get('lang');      // ex.: ?lang=fr-10 abre já em francês
 if (pedido && VERSOES[pedido]) document.getElementById('textos').open = true;
-if (!pedido || pedido === 'pt-br') {                                  // link principal (Brasil): textos fixos, só o horário muda com o fuso
+// links com textos fixos: só a data/hora muda, escolhida numa lista (fuso no Brasil, país no espanhol)
+const FUSOS = {
+  'pt-br': ['🕔 Horário na sua região', [
+    ['28 DE NOVEMBRO · SÁBADO · 17H', 'Horário de Brasília · 17h'], ['28 DE NOVEMBRO · SÁBADO · 16H', 'AM, MT, MS, RO, RR · 16h'],
+    ['28 DE NOVEMBRO · SÁBADO · 15H', 'Acre · 15h'], ['28 DE NOVEMBRO · SÁBADO · 18H', 'Fernando de Noronha · 18h']]],
+  'es': ['🕔 Horario en tu país', [
+    ['29 DE NOVIEMBRE · 10:30 H', 'España · 29/11 · 10:30 h'], ['28 DE NOVIEMBRE · 17:00 H', 'Argentina, Chile, Paraguay, Uruguay · 28/11 · 17:00 h'],
+    ['28 DE NOVIEMBRE · 16:00 H', 'Venezuela · 28/11 · 16:00 h'], ['28 DE NOVIEMBRE · 15:00 H', 'Colombia · 28/11 · 15:00 h'],
+    ['28 DE NOVIEMBRE · 7:30 PM', 'Rep. Dominicana · 28/11 · 7:30 p. m.']]],
+};
+const chaveFuso = !pedido ? 'pt-br' : (FUSOS[pedido] ? pedido : null);
+if (chaveFuso) {
+  const [rot, ops] = FUSOS[chaveFuso], sel = document.getElementById('fuso');
   document.getElementById('textos').classList.add('hidden'); document.getElementById('fusoBox').classList.remove('hidden');
-  document.getElementById('fuso').onchange = e => { inData.value = '28 DE NOVEMBRO · SÁBADO · ' + e.target.value + 'H'; desenhar(); };
+  document.getElementById('fusoRot').textContent = rot;
+  for (const [v, n] of ops) { const o = document.createElement('option'); o.value = v; o.textContent = n; sel.appendChild(o); }
+  sel.onchange = e => { inData.value = e.target.value; desenhar(); };
 }
 aplicarVersao(VERSOES[pedido] ? pedido : 'pt-br');
 document.fonts && document.fonts.ready.then(desenhar);
