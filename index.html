@@ -55,6 +55,11 @@
     font-size: 16px; padding: 10px 12px; border-radius: 10px; border: 0; color: var(--azul-esc); background: #fff; width: 100%;
   }
   .hidden { display: none !important; }
+#salvarBox{position:fixed;inset:0;background:rgba(4,12,26,.94);z-index:50;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:16px;gap:12px}
+#salvarBox img{max-width:100%;max-height:68vh;border-radius:10px;box-shadow:0 8px 30px rgba(0,0,0,.5);-webkit-touch-callout:default;user-select:auto}
+#salvarBox p{color:#fff;text-align:center;font-size:16px;line-height:1.4;margin:0;max-width:440px}
+#salvarBox p.peq{font-size:13px;opacity:.8}
+#salvarBox button{background:#fff;color:#0b2540;border:0;border-radius:24px;padding:10px 26px;font-size:15px;font-weight:600}
 </style>
 </head>
 <body>
@@ -88,6 +93,7 @@
 
     <button class="acao" id="baixar" disabled>⬇️ Baixar imagem</button>
     <button class="acao sec hidden" id="compartilhar">Compartilhar</button>
+    <div id="salvarBox" class="hidden"><img id="salvarImg" alt=""><p id="t_salvar"></p><p class="peq hidden" id="t_inapp"></p><button id="salvarFechar">OK</button></div>
     <p class="orient" id="t_dica">Dica: use uma foto de rosto, bem iluminada. A imagem é montada no seu próprio celular, nenhuma foto é enviada para a internet.</p>
   </div>
 
@@ -115,19 +121,19 @@ const VERSOES = {
   'es':      { band: '', nome: 'Español (29/11, 10:30 h)', frase: 'YO VOY', titulo: ['TROMPETAS', 'y', 'FIESTAS'], data: '29 DE NOVIEMBRE · 10:30 H', igreja: 'EN UNA IGLESIA CRISTIANA MARANATA' },
 };
 const UI = {
-  pt: { l5: 'Bandeira', tit: 'Trombetas e Festas 2026', sub: 'Coloque sua foto na moldura e mostre a todos que você vai participar.', feed: 'Feed (quadrado)', dica: 'Escolha sua foto abaixo 👇', foto: '📷 Escolher minha foto', zoom: 'Zoom', mover: 'Arraste a foto para ajustar a posição.', sum: '🌎 Idioma, data e horário', l1: 'Idioma / país', l2: 'Frase', l3: 'Data e horário', l4: 'Igreja', baixar: '⬇️ Baixar imagem', comp: 'Compartilhar', d: 'Dica: use uma foto de rosto, bem iluminada. A imagem é montada no seu próprio celular, nenhuma foto é enviada para a internet.' },
-  fr: { l5: 'Drapeau', tit: 'Trompettes et Fêtes 2026', sub: 'Mettez votre photo dans le cadre et montrez à tous que vous y serez.', feed: 'Fil (carré)', dica: 'Choisissez votre photo ci-dessous 👇', foto: '📷 Choisir ma photo', zoom: 'Zoom', mover: 'Faites glisser la photo pour ajuster la position.', sum: '🌎 Langue, date et heure', l1: 'Langue / pays', l2: 'Phrase', l3: 'Date et heure', l4: 'Église', baixar: '⬇️ Télécharger l’image', comp: 'Partager', d: 'Astuce : utilisez une photo de visage bien éclairée. L’image est créée sur votre téléphone, aucune photo n’est envoyée sur internet.' },
-  nl: { l5: 'Vlag', tit: 'Bazuinen en Feesten 2026', sub: 'Zet je foto in de lijst en laat iedereen zien dat je erbij bent.', feed: 'Feed (vierkant)', dica: 'Kies hieronder je foto 👇', foto: '📷 Kies mijn foto', zoom: 'Zoom', mover: 'Sleep de foto om de positie aan te passen.', sum: '🌎 Taal, datum en tijd', l1: 'Taal / land', l2: 'Zin', l3: 'Datum en tijd', l4: 'Kerk', baixar: '⬇️ Afbeelding downloaden', comp: 'Delen', d: 'Tip: gebruik een goed belichte foto van je gezicht. De afbeelding wordt op je eigen telefoon gemaakt; er wordt geen foto naar internet gestuurd.' },
-  en: { l5: 'Flag', tit: 'Trumpets and Feasts 2026', sub: 'Put your photo in the frame and show everyone you will be there.', feed: 'Feed (square)', dica: 'Choose your photo below 👇', foto: '📷 Choose my photo', zoom: 'Zoom', mover: 'Drag the photo to adjust its position.', sum: '🌎 Language, date and time', l1: 'Language / country', l2: 'Phrase', l3: 'Date and time', l4: 'Church', baixar: '⬇️ Download image', comp: 'Share', d: 'Tip: use a well-lit photo of your face. The image is made on your own phone; no photo is uploaded to the internet.' },
-  de: { l5: 'Flagge', tit: 'Posaunen und Feste 2026', sub: 'Setze dein Foto in den Rahmen und zeige allen, dass du dabei bist.', feed: 'Feed (quadratisch)', dica: 'Wähle unten dein Foto 👇', foto: '📷 Mein Foto wählen', zoom: 'Zoom', mover: 'Ziehe das Foto, um die Position anzupassen.', sum: '🌎 Sprache, Datum und Uhrzeit', l1: 'Sprache / Land', l2: 'Satz', l3: 'Datum und Uhrzeit', l4: 'Gemeinde', baixar: '⬇️ Bild herunterladen', comp: 'Teilen', d: 'Tipp: Verwende ein gut beleuchtetes Foto deines Gesichts. Das Bild wird auf deinem eigenen Handy erstellt; kein Foto wird ins Internet geladen.' },
-  it: { l5: 'Bandiera', tit: 'Trombe e Feste 2026', sub: 'Metti la tua foto nella cornice e mostra a tutti che ci sarai.', feed: 'Feed (quadrato)', dica: 'Scegli la tua foto qui sotto 👇', foto: '📷 Scegli la mia foto', zoom: 'Zoom', mover: 'Trascina la foto per regolare la posizione.', sum: '🌎 Lingua, data e ora', l1: 'Lingua / paese', l2: 'Frase', l3: 'Data e ora', l4: 'Chiesa', baixar: '⬇️ Scarica l’immagine', comp: 'Condividi', d: 'Consiglio: usa una foto del viso ben illuminata. L’immagine viene creata sul tuo telefono; nessuna foto viene inviata su internet.' },
-  es: { l5: 'Bandera', tit: 'Trompetas y Fiestas 2026', sub: 'Pon tu foto en el marco y muestra a todos que vas a participar.', feed: 'Feed (cuadrado)', dica: 'Elige tu foto abajo 👇', foto: '📷 Elegir mi foto', zoom: 'Zoom', mover: 'Arrastra la foto para ajustar la posición.', sum: '🌎 Idioma, fecha y hora', l1: 'Idioma / país', l2: 'Frase', l3: 'Fecha y hora', l4: 'Iglesia', baixar: '⬇️ Descargar imagen', comp: 'Compartir', d: 'Consejo: usa una foto de tu rostro bien iluminada. La imagen se crea en tu propio teléfono; ninguna foto se envía a internet.' },
+  pt: { salvar: '👆 Toque e segure a imagem e escolha <b>“Salvar imagem”</b> (ou “Adicionar às Fotos”).', inapp: 'Não apareceu a opção? Abra este link no navegador (menu ⋯ → “Abrir no navegador”) e tente de novo.', l5: 'Bandeira', tit: 'Trombetas e Festas 2026', sub: 'Coloque sua foto na moldura e mostre a todos que você vai participar.', feed: 'Feed (quadrado)', dica: 'Escolha sua foto abaixo 👇', foto: '📷 Escolher minha foto', zoom: 'Zoom', mover: 'Arraste a foto para ajustar a posição.', sum: '🌎 Idioma, data e horário', l1: 'Idioma / país', l2: 'Frase', l3: 'Data e horário', l4: 'Igreja', baixar: '⬇️ Baixar imagem', comp: 'Compartilhar', d: 'Dica: use uma foto de rosto, bem iluminada. A imagem é montada no seu próprio celular, nenhuma foto é enviada para a internet.' },
+  fr: { salvar: '👆 Appuyez longuement sur l’image et choisissez <b>« Enregistrer l’image »</b>.', inapp: 'L’option n’apparaît pas ? Ouvrez ce lien dans le navigateur (menu ⋯ → « Ouvrir dans le navigateur ») et réessayez.', l5: 'Drapeau', tit: 'Trompettes et Fêtes 2026', sub: 'Mettez votre photo dans le cadre et montrez à tous que vous y serez.', feed: 'Fil (carré)', dica: 'Choisissez votre photo ci-dessous 👇', foto: '📷 Choisir ma photo', zoom: 'Zoom', mover: 'Faites glisser la photo pour ajuster la position.', sum: '🌎 Langue, date et heure', l1: 'Langue / pays', l2: 'Phrase', l3: 'Date et heure', l4: 'Église', baixar: '⬇️ Télécharger l’image', comp: 'Partager', d: 'Astuce : utilisez une photo de visage bien éclairée. L’image est créée sur votre téléphone, aucune photo n’est envoyée sur internet.' },
+  nl: { salvar: '👆 Houd de afbeelding ingedrukt en kies <b>“Afbeelding bewaren”</b>.', inapp: 'Zie je de optie niet? Open deze link in de browser (menu ⋯ → “Openen in browser”) en probeer het opnieuw.', l5: 'Vlag', tit: 'Bazuinen en Feesten 2026', sub: 'Zet je foto in de lijst en laat iedereen zien dat je erbij bent.', feed: 'Feed (vierkant)', dica: 'Kies hieronder je foto 👇', foto: '📷 Kies mijn foto', zoom: 'Zoom', mover: 'Sleep de foto om de positie aan te passen.', sum: '🌎 Taal, datum en tijd', l1: 'Taal / land', l2: 'Zin', l3: 'Datum en tijd', l4: 'Kerk', baixar: '⬇️ Afbeelding downloaden', comp: 'Delen', d: 'Tip: gebruik een goed belichte foto van je gezicht. De afbeelding wordt op je eigen telefoon gemaakt; er wordt geen foto naar internet gestuurd.' },
+  en: { salvar: '👆 Press and hold the image and choose <b>“Save image”</b> (or “Add to Photos”).', inapp: 'Don’t see the option? Open this link in your browser (menu ⋯ → “Open in browser”) and try again.', l5: 'Flag', tit: 'Trumpets and Feasts 2026', sub: 'Put your photo in the frame and show everyone you will be there.', feed: 'Feed (square)', dica: 'Choose your photo below 👇', foto: '📷 Choose my photo', zoom: 'Zoom', mover: 'Drag the photo to adjust its position.', sum: '🌎 Language, date and time', l1: 'Language / country', l2: 'Phrase', l3: 'Date and time', l4: 'Church', baixar: '⬇️ Download image', comp: 'Share', d: 'Tip: use a well-lit photo of your face. The image is made on your own phone; no photo is uploaded to the internet.' },
+  de: { salvar: '👆 Halte das Bild gedrückt und wähle <b>„Bild speichern“</b>.', inapp: 'Keine Option zu sehen? Öffne diesen Link im Browser (Menü ⋯ → „Im Browser öffnen“) und versuche es erneut.', l5: 'Flagge', tit: 'Posaunen und Feste 2026', sub: 'Setze dein Foto in den Rahmen und zeige allen, dass du dabei bist.', feed: 'Feed (quadratisch)', dica: 'Wähle unten dein Foto 👇', foto: '📷 Mein Foto wählen', zoom: 'Zoom', mover: 'Ziehe das Foto, um die Position anzupassen.', sum: '🌎 Sprache, Datum und Uhrzeit', l1: 'Sprache / Land', l2: 'Satz', l3: 'Datum und Uhrzeit', l4: 'Gemeinde', baixar: '⬇️ Bild herunterladen', comp: 'Teilen', d: 'Tipp: Verwende ein gut beleuchtetes Foto deines Gesichts. Das Bild wird auf deinem eigenen Handy erstellt; kein Foto wird ins Internet geladen.' },
+  it: { salvar: '👆 Tieni premuto sull’immagine e scegli <b>“Salva immagine”</b>.', inapp: 'Non vedi l’opzione? Apri questo link nel browser (menu ⋯ → “Apri nel browser”) e riprova.', l5: 'Bandiera', tit: 'Trombe e Feste 2026', sub: 'Metti la tua foto nella cornice e mostra a tutti che ci sarai.', feed: 'Feed (quadrato)', dica: 'Scegli la tua foto qui sotto 👇', foto: '📷 Scegli la mia foto', zoom: 'Zoom', mover: 'Trascina la foto per regolare la posizione.', sum: '🌎 Lingua, data e ora', l1: 'Lingua / paese', l2: 'Frase', l3: 'Data e ora', l4: 'Chiesa', baixar: '⬇️ Scarica l’immagine', comp: 'Condividi', d: 'Consiglio: usa una foto del viso ben illuminata. L’immagine viene creata sul tuo telefono; nessuna foto viene inviata su internet.' },
+  es: { salvar: '👆 Mantén presionada la imagen y elige <b>“Guardar imagen”</b>.', inapp: '¿No aparece la opción? Abre este enlace en el navegador (menú ⋯ → “Abrir en el navegador”) e inténtalo de nuevo.', l5: 'Bandera', tit: 'Trompetas y Fiestas 2026', sub: 'Pon tu foto en el marco y muestra a todos que vas a participar.', feed: 'Feed (cuadrado)', dica: 'Elige tu foto abajo 👇', foto: '📷 Elegir mi foto', zoom: 'Zoom', mover: 'Arrastra la foto para ajustar la posición.', sum: '🌎 Idioma, fecha y hora', l1: 'Idioma / país', l2: 'Frase', l3: 'Fecha y hora', l4: 'Iglesia', baixar: '⬇️ Descargar imagen', comp: 'Compartir', d: 'Consejo: usa una foto de tu rostro bien iluminada. La imagen se crea en tu propio teléfono; ninguna foto se envía a internet.' },
 };
 function interface_(k) {
   const u = UI[k.slice(0, 2)] || UI.pt, set = (id, t) => { const e = document.getElementById(id); if (e) e.textContent = t; };
   document.documentElement.lang = k.slice(0, 2); set('t_h1', VERSOES[k].frase.replace(/^(.)(.*)$/, (m, a, b) => a + b.toLowerCase()) + '!');
   set('t_tit', u.tit); set('t_sub', u.sub); set('t_feed', u.feed); set('dica', u.dica); set('t_foto', u.foto); set('t_zoom', u.zoom); set('mover', u.mover);
-  set('t_sum', u.sum); set('t_l1', u.l1); set('t_l2', u.l2); set('t_l3', u.l3); set('t_l4', u.l4); set('t_l5', u.l5); set('baixar', u.baixar); set('compartilhar', u.comp); set('t_dica', u.d);
+  set('t_sum', u.sum); set('t_l1', u.l1); set('t_l2', u.l2); set('t_l3', u.l3); set('t_l4', u.l4); set('t_l5', u.l5); set('baixar', u.baixar); set('compartilhar', u.comp); set('t_dica', u.d); document.getElementById('t_salvar').innerHTML = u.salvar; document.getElementById('t_inapp').textContent = u.inapp;
 }
 const GOLD = '#f0cc78', CLARO = '#e1eef8';
 const tela = document.getElementById('tela'), ctx = tela.getContext('2d');
@@ -303,10 +309,31 @@ tela.addEventListener('pointermove', e => {
 ['pointerup', 'pointercancel'].forEach(t => tela.addEventListener(t, e => { ptrs.delete(e.pointerId); ini = null; }));
 
 function arquivoFinal(cb) { tela.toBlob(b => cb(new File([b], 'eu-vou-trombetas-e-festas-2026.jpg', { type: 'image/jpeg' })), 'image/jpeg', 0.92); }
-baixar.onclick = () => arquivoFinal(f => {
+// arquivo pronto guardado a cada mudança: o "compartilhar" do iPhone precisa ser chamado direto no toque
+let pronto = null, tPronto = null;
+const _desenhar = desenhar;
+desenhar = function () { _desenhar(); pronto = null; clearTimeout(tPronto); if (foto) tPronto = setTimeout(() => arquivoFinal(f => pronto = f), 200); };
+const UA = navigator.userAgent;
+const CELULAR = /Android|iPhone|iPad|iPod/i.test(UA) || (navigator.maxTouchPoints > 1 && /Mac/.test(navigator.platform));
+const APP_INTERNO = /Instagram|FBAN|FBAV|FB_IAB|FBIOS|Line\/|TikTok|musical_ly|Snapchat|Twitter/i.test(UA);
+function mostrarParaSalvar() {
+  document.getElementById('salvarImg').src = tela.toDataURL('image/jpeg', 0.92);
+  document.getElementById('t_inapp').classList.toggle('hidden', !APP_INTERNO);
+  document.getElementById('salvarBox').classList.remove('hidden');
+}
+document.getElementById('salvarFechar').onclick = () => document.getElementById('salvarBox').classList.add('hidden');
+function baixarArquivo(f) {
   const a = document.createElement('a'); a.href = URL.createObjectURL(f); a.download = f.name;
   document.body.appendChild(a); a.click(); a.remove();
-});
+}
+baixar.onclick = () => {
+  if (!CELULAR) { (pronto ? baixarArquivo(pronto) : arquivoFinal(baixarArquivo)); return; }
+  if (!APP_INTERNO && pronto && navigator.canShare && navigator.canShare({ files: [pronto] })) {
+    navigator.share({ files: [pronto], title: 'Trombetas e Festas 2026' }).catch(e => { if (e.name !== 'AbortError') mostrarParaSalvar(); });
+    return;
+  }
+  mostrarParaSalvar();
+};
 compartilhar.onclick = () => arquivoFinal(f => {
   if (navigator.canShare && navigator.canShare({ files: [f] })) navigator.share({ files: [f], title: 'Trombetas e Festas 2026' }).catch(() => {});
 });
