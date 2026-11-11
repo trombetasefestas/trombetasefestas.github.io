@@ -7,7 +7,7 @@
 <meta name="description" content="Coloque sua foto na moldura do Trombetas e Festas 2026 e compartilhe: eu vou!">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600&family=Tinos:wght@400;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600&family=Oswald:wght@500;600&family=Tinos:wght@400;700&display=swap" rel="stylesheet">
 <style>
   :root { --azul: #2f6f92; --azul-esc: #112e4e; --dourado: #f6d078; --branco: #fff; }
   * { box-sizing: border-box; }
@@ -120,6 +120,8 @@ const VERSOES = {
   'en-uk':   { band: 'GB', nome: 'English · England (28/11, 8 pm)', frase: "I'LL BE THERE", titulo: ['TRUMPETS', 'and', 'FEASTS'], data: 'SATURDAY 28 NOVEMBER · 8 PM', igreja: 'AT A CHRISTIAN MARANATHA CHURCH' },
   'de':      { band: 'DE', nome: 'Deutsch (29/11, 10 Uhr)', frase: 'ICH BIN DABEI', titulo: ['POSAUNEN', 'und', 'FESTE'], data: '29. NOVEMBER · 10 UHR', igreja: 'IN EINER CHRISTLICHEN GEMEINDE MARANATHA' },
   'it':      { band: 'IT', nome: 'Italiano (29/11, ore 10:00)', frase: 'IO CI SARÒ', titulo: ['TROMBE', 'e', 'FESTE'], data: '29 NOVEMBRE · ORE 10:00', igreja: 'IN UNA CHIESA CRISTIANA MARANATA' },
+  'hu':      { band: 'HU', nome: 'Magyar (29/11, 10:00)', frase: 'OTT LESZEK', titulo: ['TROMBITÁK', 'és', 'ÜNNEPEK'], data: 'NOVEMBER 29. · VASÁRNAP · 10:00', igreja: 'EGY MARANATA KERESZTÉNY EGYHÁZBAN' },
+  'ru':      { band: 'RU', nome: 'Русский (28/11, 23:00 МСК)', frase: 'Я ПРИДУ', titulo: ['ТРУБЫ', 'и', 'ПРАЗДНИКИ'], data: '28 НОЯБРЯ · СУББОТА · 23:00 (МСК)', igreja: 'В ХРИСТИАНСКОЙ ЦЕРКВИ МАРАНАФА' },
   'es':      { band: '', nome: 'Español (29/11, 10:30 h)', frase: 'YO VOY', titulo: ['TROMPETAS', 'y', 'FIESTAS'], data: '29 DE NOVIEMBRE · 10:30 H', igreja: 'EN UNA IGLESIA CRISTIANA MARANATA' },
 };
 const UI = {
@@ -129,6 +131,8 @@ const UI = {
   en: { salvar: '👆 Press and hold the image and choose <b>“Save image”</b> (or “Add to Photos”).', inapp: 'Don’t see the option? Open this link in your browser (menu ⋯ → “Open in browser”) and try again.', l5: 'Flag', tit: 'Trumpets and Feasts 2026', sub: 'Put your photo in the frame and show everyone you will be there.', feed: 'Feed (square)', dica: 'Choose your photo below 👇', foto: '📷 Choose my photo', zoom: 'Zoom', mover: 'Drag the photo to adjust its position.', sum: '🌎 Language, date and time', l1: 'Language / country', l2: 'Phrase', l3: 'Date and time', l4: 'Church', baixar: '⬇️ Download image', comp: 'Share', d: 'Tip: use a well-lit photo of your face. The image is made on your own phone; no photo is uploaded to the internet.' },
   de: { salvar: '👆 Halte das Bild gedrückt und wähle <b>„Bild speichern“</b>.', inapp: 'Keine Option zu sehen? Öffne diesen Link im Browser (Menü ⋯ → „Im Browser öffnen“) und versuche es erneut.', l5: 'Flagge', tit: 'Posaunen und Feste 2026', sub: 'Setze dein Foto in den Rahmen und zeige allen, dass du dabei bist.', feed: 'Feed (quadratisch)', dica: 'Wähle unten dein Foto 👇', foto: '📷 Mein Foto wählen', zoom: 'Zoom', mover: 'Ziehe das Foto, um die Position anzupassen.', sum: '🌎 Sprache, Datum und Uhrzeit', l1: 'Sprache / Land', l2: 'Satz', l3: 'Datum und Uhrzeit', l4: 'Gemeinde', baixar: '⬇️ Bild herunterladen', comp: 'Teilen', d: 'Tipp: Verwende ein gut beleuchtetes Foto deines Gesichts. Das Bild wird auf deinem eigenen Handy erstellt; kein Foto wird ins Internet geladen.' },
   it: { salvar: '👆 Tieni premuto sull’immagine e scegli <b>“Salva immagine”</b>.', inapp: 'Non vedi l’opzione? Apri questo link nel browser (menu ⋯ → “Apri nel browser”) e riprova.', l5: 'Bandiera', tit: 'Trombe e Feste 2026', sub: 'Metti la tua foto nella cornice e mostra a tutti che ci sarai.', feed: 'Feed (quadrato)', dica: 'Scegli la tua foto qui sotto 👇', foto: '📷 Scegli la mia foto', zoom: 'Zoom', mover: 'Trascina la foto per regolare la posizione.', sum: '🌎 Lingua, data e ora', l1: 'Lingua / paese', l2: 'Frase', l3: 'Data e ora', l4: 'Chiesa', baixar: '⬇️ Scarica l’immagine', comp: 'Condividi', d: 'Consiglio: usa una foto del viso ben illuminata. L’immagine viene creata sul tuo telefono; nessuna foto viene inviata su internet.' },
+  hu: { salvar: '👆 Tartsd lenyomva a képet, és válaszd a <b>„Kép mentése”</b> lehetőséget.', inapp: 'Nem látod ezt a lehetőséget? Nyisd meg a linket a böngészőben (⋯ menü → „Megnyitás böngészőben”), és próbáld újra.', l5: 'Zászló', tit: 'Trombiták és Ünnepek 2026', sub: 'Tedd a fotódat a keretbe, és mutasd meg mindenkinek, hogy ott leszel.', feed: 'Feed (négyzet)', dica: 'Válaszd ki a fotódat lent 👇', foto: '📷 Fotó kiválasztása', zoom: 'Nagyítás', mover: 'Húzd a fotót a pozíció beállításához.', sum: '🌎 Nyelv, dátum és idő', l1: 'Nyelv / ország', l2: 'Mondat', l3: 'Dátum és idő', l4: 'Egyház', baixar: '⬇️ Kép letöltése', comp: 'Megosztás', d: 'Tipp: használj jól megvilágított arcképet. A kép a saját telefonodon készül, egyetlen fotó sem kerül fel az internetre.' },
+  ru: { salvar: '👆 Нажмите и удерживайте изображение и выберите <b>«Сохранить изображение»</b>.', inapp: 'Не видите этот пункт? Откройте ссылку в браузере (меню ⋯ → «Открыть в браузере») и попробуйте снова.', l5: 'Флаг', tit: '«Трубы и праздники» 2026', sub: 'Поместите своё фото в рамку и покажите всем, что вы придёте.', feed: 'Лента (квадрат)', dica: 'Выберите фото ниже 👇', foto: '📷 Выбрать фото', zoom: 'Масштаб', mover: 'Перетащите фото, чтобы настроить положение.', sum: '🌎 Язык, дата и время', l1: 'Язык / страна', l2: 'Фраза', l3: 'Дата и время', l4: 'Церковь', baixar: '⬇️ Скачать изображение', comp: 'Поделиться', d: 'Совет: используйте хорошо освещённое фото лица. Изображение создаётся на вашем телефоне, фото никуда не отправляется.' },
   es: { salvar: '👆 Mantén presionada la imagen y elige <b>“Guardar imagen”</b>.', inapp: '¿No aparece la opción? Abre este enlace en el navegador (menú ⋯ → “Abrir en el navegador”) e inténtalo de nuevo.', l5: 'Bandera', tit: 'Trompetas y Fiestas 2026', sub: 'Pon tu foto en el marco y muestra a todos que vas a participar.', feed: 'Feed (cuadrado)', dica: 'Elige tu foto abajo 👇', foto: '📷 Elegir mi foto', zoom: 'Zoom', mover: 'Arrastra la foto para ajustar la posición.', sum: '🌎 Idioma, fecha y hora', l1: 'Idioma / país', l2: 'Frase', l3: 'Fecha y hora', l4: 'Iglesia', baixar: '⬇️ Descargar imagen', comp: 'Compartir', d: 'Consejo: usa una foto de tu rostro bien iluminada. La imagen se crea en tu propio teléfono; ninguna foto se envía a internet.' },
 };
 function interface_(k) {
@@ -138,6 +142,7 @@ function interface_(k) {
   set('t_sum', u.sum); set('t_l1', u.l1); set('t_l2', u.l2); set('t_l3', u.l3); set('t_l4', u.l4); set('t_l5', u.l5); set('baixar', u.baixar); set('compartilhar', u.comp); set('t_dica', u.d); document.getElementById('t_salvar').innerHTML = u.salvar; document.getElementById('t_inapp').textContent = u.inapp;
 }
 const GOLD = '#f0cc78', CLARO = '#e1eef8';
+const COND = () => (versao === 'ru' ? 'Oswald' : '"Barlow Condensed"');   // Barlow não tem cirílico
 const tela = document.getElementById('tela'), ctx = tela.getContext('2d');
 const dica = document.getElementById('dica'), zoom = document.getElementById('zoom');
 const baixar = document.getElementById('baixar'), compartilhar = document.getElementById('compartilhar');
@@ -155,7 +160,7 @@ function aplicarVersao(k) {
 selV.onchange = () => aplicarVersao(selV.value);
 [inFrase, inData, inIgreja].forEach(i => i.oninput = desenhar); selB.onchange = desenhar;
 // bandeiras desenhadas no próprio canvas (funciona em qualquer celular, sem depender de emoji)
-const BANDEIRAS = { '': '—', BR: 'Brasil', PT: 'Portugal', FR: 'France', BE: 'Belgique', CH: 'Suisse / Schweiz', NL: 'Nederland', GB: 'United Kingdom', IE: 'Ireland', US: 'United States', DE: 'Deutschland', AT: 'Österreich', IT: 'Italia', ES: 'España' };
+const BANDEIRAS = { '': '—', BR: 'Brasil', PT: 'Portugal', FR: 'France', BE: 'Belgique', CH: 'Suisse / Schweiz', NL: 'Nederland', GB: 'United Kingdom', IE: 'Ireland', US: 'United States', DE: 'Deutschland', AT: 'Österreich', IT: 'Italia', ES: 'España', HU: 'Magyarország', RU: 'Россия' };
 for (const [k, n] of Object.entries(BANDEIRAS)) { const o = document.createElement('option'); o.value = k; o.textContent = n; selB.appendChild(o); }
 function bandeira(code, x, y, h) {
   const w = h * 1.5; ctx.save(); ctx.beginPath(); ctx.roundRect ? ctx.roundRect(x, y, w, h, h * .12) : ctx.rect(x, y, w, h); ctx.clip();
@@ -173,6 +178,8 @@ function bandeira(code, x, y, h) {
   else if (code === 'NL') hor(['#ae1c28', '#fff', '#21468b']);
   else if (code === 'DE') hor(['#000', '#dd0000', '#ffce00']);
   else if (code === 'AT') hor(['#c8102e', '#fff', '#c8102e']);
+  else if (code === 'HU') hor(['#cd2a3e', '#fff', '#436f4d']);
+  else if (code === 'RU') hor(['#fff', '#0039a6', '#d52b1e']);
   else if (code === 'ES') hor(['#aa151b', '#f1bf00', '#aa151b'], [.25, .5, .25]);
   else if (code === 'CH') { ctx.fillStyle = '#da291c'; ctx.fillRect(x, y, w, h); ctx.fillStyle = '#fff'; const c = h * .2; ctx.fillRect(x + w / 2 - c / 2, y + h * .2, c, h * .6); ctx.fillRect(x + w / 2 - h * .3, y + h / 2 - c / 2, h * .6, c); }
   else if (code === 'US') { for (let i = 0; i < 13; i++) { ctx.fillStyle = i % 2 ? '#fff' : '#b22234'; ctx.fillRect(x, y + h * i / 13, w, h / 13 + 1); } ctx.fillStyle = '#3c3b6e'; ctx.fillRect(x, y, w * .4, h * 7 / 13); }
@@ -221,7 +228,7 @@ if (chaveFuso) {
 }
 aplicarVersao(VERSOES[pedido] ? pedido : 'pt-br');
 document.fonts && document.fonts.ready.then(desenhar);
-Promise.all(['700 40px Tinos', '400 40px Tinos', '600 40px "Barlow Condensed"', '500 40px "Barlow Condensed"'].map(f => document.fonts.load(f))).then(desenhar).catch(() => {});
+Promise.all(['700 40px Tinos', '400 40px Tinos', '600 40px "Barlow Condensed"', '500 40px "Barlow Condensed"', '600 40px Oswald', '500 40px Oswald'].map(f => document.fonts.load(f))).then(desenhar).catch(() => {});
 
 // texto com espaçamento entre letras (centralizado), reduzindo a fonte se passar da largura máxima
 function espacado(txt, cx, cy, fonte, tam, track, cor, maxw, so_medir) {
@@ -244,9 +251,9 @@ function textos() {
   // data e horário entre filetes dourados
   ctx.save(); ctx.textAlign = 'left';
   const dtxt = (inData.value || '').toUpperCase(), code = selB.value, fh = L.dt_s * .78, fw = code ? fh * 1.5 + L.dt_s * .4 : 0;
-  const maxw = W - 2 * (L.ln + 70) - fw, tw = espacado(dtxt, 0, 0, '600 {s} "Barlow Condensed"', L.dt_s, .12, GOLD, maxw, true);
+  const maxw = W - 2 * (L.ln + 70) - fw, tw = espacado(dtxt, 0, 0, '600 {s} ' + COND(), L.dt_s, .12, GOLD, maxw, true);
   if (code) bandeira(code, W / 2 - (tw + fw) / 2, L.dt_y - fh / 2, fh);
-  espacado(dtxt, W / 2 + fw / 2, L.dt_y, '600 {s} "Barlow Condensed"', L.dt_s, .12, GOLD, maxw);
+  espacado(dtxt, W / 2 + fw / 2, L.dt_y, '600 {s} ' + COND(), L.dt_s, .12, GOLD, maxw);
   const w = tw + fw;
   ctx.strokeStyle = GOLD; ctx.lineWidth = 3;
   for (const sg of [-1, 1]) { const x0 = W / 2 + sg * (w / 2 + 26); ctx.beginPath(); ctx.moveTo(x0, L.dt_y); ctx.lineTo(x0 + sg * L.ln, L.dt_y); ctx.stroke(); }
@@ -258,12 +265,12 @@ function textos() {
     ctx.textAlign = 'center'; ctx.fillStyle = '#fff'; ctx.textBaseline = 'alphabetic';
     let s1 = ajusta(l1, '400 {s} Tinos', h * 0.36, L.ti_w * 1.1); ctx.font = `400 ${s1}px Tinos`; ctx.fillText(l1, W / 2, L.ti_y + h * 0.30);
     let s2 = ajusta(cj + ' ' + l2, '700 {s} Tinos', h * 0.48, L.ti_w * 1.1); ctx.font = `700 ${s2}px Tinos`; ctx.fillText(cj + ' ' + l2, W / 2, L.ti_y + h * 0.74);
-    ctx.textAlign = 'left'; const wy = espacado('2026', W / 2, L.ti_y + h * 0.92, '500 {s} "Barlow Condensed"', h * 0.11, .9, '#fff', L.ti_w);
+    ctx.textAlign = 'left'; const wy = espacado('2026', W / 2, L.ti_y + h * 0.92, '500 {s} ' + COND(), h * 0.11, .9, '#fff', L.ti_w);
     ctx.strokeStyle = '#fff'; ctx.lineWidth = 2;
     for (const sg of [-1, 1]) { const x0 = W / 2 + sg * (wy / 2 + L.ti_w * .08); ctx.beginPath(); ctx.moveTo(x0, L.ti_y + h * 0.92); ctx.lineTo(x0 + sg * L.ti_w * .22, L.ti_y + h * 0.92); ctx.stroke(); }
   }
   // igreja
-  espacado((inIgreja.value || '').toUpperCase(), W / 2, L.ig_y, '500 {s} "Barlow Condensed"', L.ig_s, .14, CLARO, W - 80);
+  espacado((inIgreja.value || '').toUpperCase(), W / 2, L.ig_y, '500 {s} ' + COND(), L.ig_s, .14, CLARO, W - 80);
   ctx.restore();
 }
 
