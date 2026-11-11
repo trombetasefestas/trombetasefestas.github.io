@@ -354,5 +354,22 @@ compartilhar.onclick = () => arquivoFinal(f => {
   if (navigator.canShare && navigator.canShare({ files: [f] })) navigator.share({ files: [f], title: 'Trombetas e Festas 2026' }).catch(() => {});
 });
 </script>
+<script>
+// contador de acessos (GoatCounter, sem cookies): uma visita por link de idioma + quem pôs foto / baixou / compartilhou
+(function () {
+  const L = (new URLSearchParams(location.search).get('lang') || 'brasil').toLowerCase().replace(/[^a-z0-9-]/g, '');
+  window.goatcounter = { path: '/eu-vou/' + L, title: 'Eu vou · ' + L };
+  const feito = {};
+  function ev(nome) {
+    if (feito[nome]) return; feito[nome] = 1;     // conta uma vez por pessoa (por abertura da página)
+    const go = () => window.goatcounter && window.goatcounter.count && window.goatcounter.count({ path: nome + '/' + L, title: nome + ' · ' + L, event: true });
+    window.goatcounter && window.goatcounter.count ? go() : setTimeout(go, 1500);
+  }
+  document.getElementById('arquivo').addEventListener('change', () => ev('foto'));
+  document.getElementById('baixar').addEventListener('click', () => ev('baixar'));
+  document.getElementById('compartilhar').addEventListener('click', () => ev('compartilhar'));
+})();
+</script>
+<script data-goatcounter="https://trombetasefestas.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
 </body>
 </html>
