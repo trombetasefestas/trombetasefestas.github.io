@@ -66,6 +66,7 @@
   <h1><b id="t_h1">EU VOU!</b> · <span id="t_tit">Trombetas e Festas 2026</span></h1>
   <p class="sub" id="t_sub">Coloque sua foto na moldura e mostre a todos que você vai participar.</p>
 
+  <div class="formatos" id="modos"><button data-m="eu" class="ativo" id="m_eu">👤 EU VOU</button><button data-m="nos" id="m_nos">👨‍👩‍👧‍👦 NÓS VAMOS</button></div>
   <div class="formatos" role="group" aria-label="Formato">
     <button data-f="1x1" class="ativo" id="t_feed">Feed (quadrado)</button>
     <button data-f="9x16">Stories / Status</button>
@@ -137,11 +138,16 @@ const UI = {
 };
 function interface_(k) {
   const u = UI[k.slice(0, 2)] || UI.pt, set = (id, t) => { const e = document.getElementById(id); if (e) e.textContent = t; };
-  document.documentElement.lang = k.slice(0, 2); set('t_h1', VERSOES[k].frase.replace(/^(.)(.*)$/, (m, a, b) => a + b.toLowerCase()) + '!');
+  document.documentElement.lang = k.slice(0, 2); set('t_h1', tituloFrase(fraseDe(k))); set('m_eu', '👤 ' + VERSOES[k].frase); set('m_nos', '👨‍👩‍👧‍👦 ' + NOS[k.slice(0, 2)]);
   set('t_tit', u.tit); set('t_sub', u.sub); set('t_feed', u.feed); set('dica', u.dica); set('t_foto', u.foto); set('t_zoom', u.zoom); set('mover', u.mover);
   set('t_sum', u.sum); set('t_l1', u.l1); set('t_l2', u.l2); set('t_l3', u.l3); set('t_l4', u.l4); set('t_l5', u.l5); set('baixar', u.baixar); set('compartilhar', u.comp); set('t_dica', u.d); document.getElementById('t_salvar').innerHTML = u.salvar; document.getElementById('t_inapp').textContent = u.inapp;
 }
 const GOLD = '#f0cc78', CLARO = '#e1eef8';
+// avatar coletivo: "NÓS VAMOS" no idioma de cada versão
+const NOS = { pt: 'NÓS VAMOS', fr: 'NOUS Y SERONS', nl: 'WIJ ZIJN ERBIJ', en: "WE'LL BE THERE", de: 'WIR SIND DABEI', it: 'NOI CI SAREMO', es: 'NOSOTROS VAMOS', hu: 'OTT LESZÜNK', ru: 'МЫ ПРИДЁМ' };
+let modo = new URLSearchParams(location.search).get('modo') === 'nos' ? 'nos' : 'eu';
+const fraseDe = k => (modo === 'nos' ? NOS[k.slice(0, 2)] : VERSOES[k].frase);
+const tituloFrase = f => f.replace(/^(.)(.*)$/, (m, a, b) => a + b.toLowerCase()) + '!';
 const COND = () => (versao === 'ru' ? 'Oswald' : '"Barlow Condensed"');   // Barlow não tem cirílico
 const tela = document.getElementById('tela'), ctx = tela.getContext('2d');
 const dica = document.getElementById('dica'), zoom = document.getElementById('zoom');
@@ -155,7 +161,7 @@ for (const [k, m] of Object.entries(MOLDURAS)) { const i = new Image(); i.onload
 for (const [k, v] of Object.entries(VERSOES)) { const o = document.createElement('option'); o.value = k; o.textContent = v.nome; selV.appendChild(o); }
 function aplicarVersao(k) {
   versao = k; const v = VERSOES[k]; selV.value = k;
-  inFrase.value = v.frase; inData.value = v.data; inIgreja.value = v.igreja; selB.value = v.band || ''; interface_(k); desenhar();
+  inFrase.value = fraseDe(k); inData.value = v.data; inIgreja.value = v.igreja; selB.value = v.band || ''; interface_(k); desenhar();
 }
 selV.onchange = () => aplicarVersao(selV.value);
 [inFrase, inData, inIgreja].forEach(i => i.oninput = desenhar); selB.onchange = desenhar;
@@ -296,8 +302,15 @@ function limitar() {
   est.x = Math.min(mx, Math.max(-mx, est.x)); est.y = Math.min(my, Math.max(-my, est.y));
 }
 
-document.querySelectorAll('.formatos button').forEach(b => b.onclick = () => {
-  document.querySelectorAll('.formatos button').forEach(x => x.classList.toggle('ativo', x === b));
+document.querySelectorAll('#modos button').forEach(b => {
+  b.classList.toggle('ativo', b.dataset.m === modo);
+  b.onclick = () => {
+    modo = b.dataset.m; document.querySelectorAll('#modos button').forEach(x => x.classList.toggle('ativo', x === b));
+    inFrase.value = fraseDe(versao); document.getElementById('t_h1').textContent = tituloFrase(inFrase.value); desenhar();
+  };
+});
+document.querySelectorAll('.formatos button[data-f]').forEach(b => b.onclick = () => {
+  document.querySelectorAll('.formatos button[data-f]').forEach(x => x.classList.toggle('ativo', x === b));
   formato = b.dataset.f; est = { s: 1, x: 0, y: 0 }; zoom.value = 1; desenhar();
 });
 
@@ -365,11 +378,12 @@ compartilhar.onclick = () => arquivoFinal(f => {
 // contador de acessos (GoatCounter, sem cookies): uma visita por link de idioma + quem pôs foto / baixou / compartilhou
 (function () {
   const L = (new URLSearchParams(location.search).get('lang') || 'brasil').toLowerCase().replace(/[^a-z0-9-]/g, '');
-  window.goatcounter = { path: '/eu-vou/' + L, title: 'Eu vou · ' + L };
+  const M = new URLSearchParams(location.search).get('modo') === 'nos' ? '-nos' : '';
+  window.goatcounter = { path: '/eu-vou/' + L + M, title: (M ? 'Nós vamos · ' : 'Eu vou · ') + L };
   const feito = {};
   function ev(nome) {
     if (feito[nome]) return; feito[nome] = 1;     // conta uma vez por pessoa (por abertura da página)
-    const go = () => window.goatcounter && window.goatcounter.count && window.goatcounter.count({ path: nome + '/' + L, title: nome + ' · ' + L, event: true });
+    const go = () => window.goatcounter && window.goatcounter.count && window.goatcounter.count({ path: nome + '/' + L + (modo === 'nos' ? '-nos' : ''), title: nome + ' · ' + L + (modo === 'nos' ? ' · nós vamos' : ''), event: true });
     window.goatcounter && window.goatcounter.count ? go() : setTimeout(go, 1500);
   }
   document.getElementById('arquivo').addEventListener('change', () => ev('foto'));
