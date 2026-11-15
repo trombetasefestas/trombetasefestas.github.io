@@ -54,6 +54,7 @@
   .campo input, .campo select {
     font-size: 16px; padding: 10px 12px; border-radius: 10px; border: 0; color: var(--azul-esc); background: #fff; width: 100%;
   }
+  a.convite { display: block; text-align: center; padding: 14px; border-radius: 14px; font-size: 15px; font-weight: 700; line-height: 1.35; text-decoration: none; background: var(--azul-esc); color: var(--dourado); }
   .hidden { display: none !important; }
 #salvarBox{position:fixed;inset:0;background:rgba(4,12,26,.94);z-index:50;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:16px;gap:12px}
 #salvarBox img{max-width:100%;max-height:68vh;border-radius:10px;box-shadow:0 8px 30px rgba(0,0,0,.5);-webkit-touch-callout:default;user-select:auto}
@@ -98,6 +99,7 @@
     <button class="acao sec hidden" id="compartilhar">Compartilhar</button>
     <div id="salvarBox" class="hidden"><img id="salvarImg" alt=""><p id="t_salvar"></p><p class="peq hidden" id="t_inapp"></p><button id="salvarFechar">OK</button></div>
     <p class="orient" id="t_dica">Dica: use uma foto de rosto, bem iluminada. A imagem é montada no seu próprio celular, nenhuma foto é enviada para a internet.</p>
+    <a class="convite hidden" id="linkConvite" href="convite/">💌 Convide alguém: monte um convite com o nome da pessoa e o endereço da sua igreja</a>
   </div>
 
 <script>
@@ -199,6 +201,7 @@ function bandeira(code, x, y, h) {
   return w;
 }
 const pedido = new URLSearchParams(location.search).get('lang');      // ex.: ?lang=fr-10 abre já em francês
+if (!pedido || pedido === 'pt-br') document.getElementById('linkConvite').classList.remove('hidden');   // convite só existe em português (Brasil)
 if (pedido && VERSOES[pedido]) document.getElementById('textos').open = true;
 // links com textos fixos: só a data/hora muda, escolhida numa lista (fuso no Brasil, país no espanhol)
 const FUSOS = {
