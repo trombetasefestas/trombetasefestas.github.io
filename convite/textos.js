@@ -104,6 +104,8 @@ const VERSOES = {
   'fr-28':   { base: 'fr', data: 'Samedi 28 novembre à 17h (heure de Brasília)' },
   'fr-10':   { base: 'fr', data: 'Dimanche 29 novembre à 10h' },
   'fr-1030': { base: 'fr', data: 'Dimanche 29 novembre à 10h30' },
+  'fr-0512-17': { base: 'fr', data: 'Samedi 5 décembre à 17h' },
+  'fr-0512-19': { base: 'fr', data: 'Samedi 5 décembre à 19h' },
   'nl-28':   { base: 'nl', data: 'Zaterdag 28 november om 17.00 uur (Braziliaanse tijd)' },
   'nl-29':   { base: 'nl', data: '29 november om 10.30 uur' },
   'en':      { base: 'en', data: 'Saturday, November 28' },
