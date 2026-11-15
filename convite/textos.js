@@ -107,6 +107,7 @@ const VERSOES = {
   'nl-28':   { base: 'nl', data: 'Zaterdag 28 november om 17.00 uur (Braziliaanse tijd)' },
   'nl-29':   { base: 'nl', data: '29 november om 10.30 uur' },
   'en':      { base: 'en', data: 'Saturday, November 28' },
+  'en-730':  { base: 'en', data: 'Saturday, November 28 at 7:30 pm' },
   'en-uk':   { base: 'en', data: 'Saturday 28 November at 8 pm', honour: true },
   'de':      { base: 'de', data: '29. November um 10 Uhr' },
   'it':      { base: 'it', data: '29 novembre, ore 10:00' },
