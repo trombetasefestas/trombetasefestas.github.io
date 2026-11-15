@@ -201,7 +201,15 @@ function bandeira(code, x, y, h) {
   return w;
 }
 const pedido = new URLSearchParams(location.search).get('lang');      // ex.: ?lang=fr-10 abre já em francês
-if (!pedido || pedido === 'pt-br') document.getElementById('linkConvite').classList.remove('hidden');   // convite só existe em português (Brasil)
+{ // botão para o convite personalizado (mesmo idioma/país do link)
+  const CONV = { pt: '💌 Convide alguém: monte um convite com o nome da pessoa e o endereço da sua igreja', fr: '💌 Invitez quelqu’un : créez une invitation avec son nom et l’adresse de votre église',
+    nl: '💌 Nodig iemand uit: maak een uitnodiging met de naam en het adres van je kerk', en: '💌 Invite someone: make an invitation with their name and your church’s address',
+    de: '💌 Lade jemanden ein: erstelle eine Einladung mit dem Namen und der Adresse deiner Gemeinde', it: '💌 Invita qualcuno: crea un invito con il suo nome e l’indirizzo della tua chiesa',
+    hu: '💌 Hívj meg valakit: készíts meghívót a nevével és a gyülekezeted címével', ru: '💌 Пригласите кого-нибудь: создайте приглашение с его именем и адресом вашей церкви',
+    es: '💌 Invita a alguien: crea una invitación con su nombre y la dirección de tu iglesia' };
+  const k = (pedido || 'pt-br').toLowerCase(), base = k.split('-')[0], a = document.getElementById('linkConvite');
+  if (CONV[base]) { a.textContent = CONV[base]; a.href = 'convite/' + (k === 'pt-br' ? '' : '?lang=' + k); a.classList.remove('hidden'); }
+}
 if (pedido && VERSOES[pedido]) document.getElementById('textos').open = true;
 // links com textos fixos: só a data/hora muda, escolhida numa lista (fuso no Brasil, país no espanhol)
 const FUSOS = {

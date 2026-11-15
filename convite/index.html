@@ -7,7 +7,7 @@
 <meta name="description" content="Monte um convite do Trombetas e Festas 2026 com o nome de quem você quer convidar e o endereço da sua igreja.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700&family=Poppins:wght@400;700&family=Tinos:wght@700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&family=Poppins:wght@300;400;700&family=Tinos:wght@400;700&display=swap" rel="stylesheet">
 <style>
   :root { --azul: #2f6f92; --azul-esc: #112e4e; --dourado: #f6d078; --branco: #fff; }
   * { box-sizing: border-box; }
@@ -51,17 +51,17 @@
 </style>
 </head>
 <body>
-  <h1><b>CONVITE</b> · <span>Trombetas e Festas 2026</span></h1>
-  <p class="sub">Digite o nome de quem você quer convidar e o endereço da sua igreja. O convite fica pronto na hora para enviar.</p>
+  <h1><b id="t_h1">CONVITE</b> · <span id="t_tit">Trombetas e Festas 2026</span></h1>
+  <p class="sub" id="t_sub">Digite o nome de quem você quer convidar e o endereço da sua igreja. O convite fica pronto na hora para enviar.</p>
 
   <div class="controles">
-    <label class="campo">Nome do convidado <small>(pode ser uma pessoa ou uma família, ex.: Família Souza)</small>
+    <label class="campo"><span id="t_nome">Nome do convidado</span> <small id="t_nomeh">(pode ser uma pessoa ou uma família, ex.: Família Souza)</small>
       <input id="nome" maxlength="40" autocomplete="off" placeholder="Ex.: Maria Aparecida"></label>
-    <label class="campo">Igreja <small>(opcional)</small>
+    <label class="campo"><span id="t_igr">Igreja</span> <small id="t_opc">(opcional)</small>
       <input id="igreja" maxlength="50" autocomplete="off" placeholder="Ex.: ICM Praia do Canto"></label>
-    <label class="campo">Endereço da igreja
+    <label class="campo"><span id="t_end">Endereço da igreja</span>
       <textarea id="endereco" maxlength="120" rows="2" placeholder="Ex.: Rua Aleixo Netto, 1624 – Praia do Canto, Vitória/ES"></textarea></label>
-    <label class="campo">🕔 Horário na sua região
+    <label class="campo" id="fusoBox"><span id="t_fuso">🕔 Horário na sua região</span>
       <select id="fuso">
         <option value="17h (horário de Brasília)">Horário de Brasília · 17h</option>
         <option value="16h (horário local)">AM, MT, MS, RO, RR · 16h</option>
@@ -71,23 +71,42 @@
 
     <div class="palco"><canvas id="tela" width="1080" height="1920"></canvas></div>
 
-    <button class="acao" id="baixar" disabled>⬇️ Baixar convite</button>
-    <button class="acao sec hidden" id="compartilhar">📲 Enviar (WhatsApp, Instagram…)</button>
-    <div id="salvarBox" class="hidden"><img id="salvarImg" alt="Convite pronto"><p>👆 Toque e segure a imagem e escolha <b>“Salvar imagem”</b> (ou “Adicionar às Fotos”).</p><p class="peq hidden" id="t_inapp">Não apareceu a opção? Abra este link no navegador (menu ⋯ → “Abrir no navegador”) e tente de novo.</p><button id="salvarFechar">OK</button></div>
-    <p class="orient">O convite é montado no seu próprio celular. Nome e endereço não são enviados para a internet.</p>
-    <a class="acao sec" href="../">📸 Faça também o seu “EU VOU!”</a>
+    <button class="acao" id="baixar" disabled><span id="t_baixar">⬇️ Baixar convite</span></button>
+    <button class="acao sec hidden" id="compartilhar"><span id="t_enviar">📲 Enviar (WhatsApp, Instagram…)</span></button>
+    <div id="salvarBox" class="hidden"><img id="salvarImg" alt="Convite pronto"><p id="t_salvar">👆 Toque e segure a imagem e escolha <b>“Salvar imagem”</b> (ou “Adicionar às Fotos”).</p><p class="peq hidden" id="t_inapp">Não apareceu a opção? Abra este link no navegador (menu ⋯ → “Abrir no navegador”) e tente de novo.</p><button id="salvarFechar">OK</button></div>
+    <p class="orient" id="t_priv">O convite é montado no seu próprio celular. Nome e endereço não são enviados para a internet.</p>
+    <a class="acao sec" id="t_euvou" href="../">📸 Faça também o seu “EU VOU!”</a>
   </div>
 
+<script src="textos.js"></script>
 <script>
 const W = 1080, H = 1920;
+const LANG = (new URLSearchParams(location.search).get('lang') || 'pt-br').toLowerCase();
+const V = VERSOES[LANG] || null, EXT = !!V;          // EXT = link do exterior (arte traduzida)
+const A = EXT ? ARTE[V.base] : null, U = EXT ? UI[V.base] : null;
+if (EXT && V.honour) A.p1 = A.p1.map(([t, w]) => [t.replace('honored', 'honoured'), w]);
+const RU = EXT && V.base === 'ru';                     // Poppins não tem cirílico: usa Montserrat
 const tela = document.getElementById('tela'), ctx = tela.getContext('2d');
 const $ = id => document.getElementById(id);
 const nome = $('nome'), igreja = $('igreja'), endereco = $('endereco'), fuso = $('fuso'), baixar = $('baixar'), compartilhar = $('compartilhar');
-const fundo = new Image(); fundo.src = 'fundo_convite_9x16.png';
+const fundo = new Image(); fundo.src = EXT ? 'fundo_exterior_9x16.png' : 'fundo_convite_9x16.png';
+const mono = new Image(); if (EXT) mono.src = 'monograma_im.png';
+
+if (EXT) {                                             // página traduzida
+  document.documentElement.lang = V.base;
+  const t = (id, v, html) => { const e = $(id); if (e) e[html ? 'innerHTML' : 'textContent'] = v; };
+  t('t_h1', U.h1); t('t_tit', A.tit); t('t_sub', U.sub); t('t_nome', U.nome); t('t_nomeh', U.nomeh); t('t_igr', U.igr); t('t_opc', U.opc);
+  t('t_end', U.end); t('t_fuso', U.fuso); t('t_baixar', U.baixar); t('t_enviar', U.enviar); t('t_salvar', U.salvar, 1); t('t_inapp', U.inapp);
+  t('t_priv', U.priv); t('t_euvou', U.euvou); $('t_euvou').href = '../?lang=' + LANG; document.title = U.h1 + ' · ' + A.tit;
+  nome.placeholder = U.nomeph; igreja.placeholder = U.igrph; endereco.placeholder = U.endph;
+  if (V.fusos) fuso.innerHTML = V.fusos.map(([v, r]) => `<option value="${v}">${r}</option>`).join('');
+  else $('fusoBox').classList.add('hidden');
+}
 
 const BRANCO = '#f5f5f5', DOURADO = '#f6d078', PIN = '#c2edff';
 const F_MONT = (w, s) => `${w} ${s}px Montserrat, Arial, sans-serif`;
-const F_POP = (w, s) => `${w} ${s}px Poppins, Arial, sans-serif`;
+const F_POP = (w, s) => RU ? `${w === 300 ? 400 : w} ${s}px Montserrat, Arial, sans-serif` : `${w} ${s}px Poppins, Arial, sans-serif`;
+const F_SER = (w, s) => `${w} ${s}px Tinos, "Times New Roman", serif`;
 
 // quebra texto com trechos em negrito: runs = [[texto, peso], ...]
 function quebrar(runs, size, maxW, fam) {
@@ -146,12 +165,46 @@ function iconePin(x, y, w) {
   ctx.restore();
 }
 
+// título traduzido, logo (monograma + nome da igreja) e faixa: mesmas posições da arte brasileira
+function caber(txt, font, size, maxW) { ctx.font = font(size); while (ctx.measureText(txt).width > maxW && size > 20) ctx.font = font(--size); return size; }
+function espacado(txt, y, track, cor) {
+  const ws = [...txt].map(c => ctx.measureText(c).width), tw = ws.reduce((a, b) => a + b, 0) + track * ([...txt].length - 1);
+  let x = W / 2 - tw / 2; ctx.fillStyle = cor; [...txt].forEach((c, i) => { ctx.fillText(c, x, y); x += ws[i] + track; });
+}
+function versalete(txt, y, big, maxW) {        // letras maiúsculas com a 1ª de cada palavra maior, como no logo oficial
+  let k = 1, partes, tw;
+  const medir = () => { partes = []; tw = 0; txt.split(' ').forEach((p, i) => { if (i) partes.push([' ', big * k * .8]); partes.push([p[0], big * k]); if (p.length > 1) partes.push([p.slice(1), big * k * .8]); });
+    partes.forEach(pt => { ctx.font = F_SER(400, pt[1]); pt[2] = ctx.measureText(pt[0]).width; tw += pt[2]; }); };
+  medir(); while (tw > maxW && k > .5) { k -= .03; medir(); }
+  let x = W / 2 - tw / 2; ctx.fillStyle = '#ffffff';
+  partes.forEach(([t, s, w]) => { ctx.font = F_SER(400, s); ctx.fillText(t, x, y); x += w; });
+}
+function arteExterior() {
+  ctx.textAlign = 'left'; ctx.textBaseline = 'alphabetic';
+  const [l1, peq, l2] = A.titulo, s1 = caber(l1, n => F_SER(400, n), 104, 820);
+  const w1 = ctx.measureText(l1).width, n = [...A.sobre].length;      // "CULTO INTERNACIONAL" espaçado na largura da 1ª linha do título
+  let ks = 40; ctx.font = F_SER(400, ks); let tw = ctx.measureText(A.sobre).width, tr = (Math.max(w1, 560) - tw) / (n - 1);
+  if (tr < 3) { tr = 3; ks = caber(A.sobre, k => F_SER(400, k), 40, 740 - 3 * (n - 1)); }
+  ctx.font = F_SER(400, ks); espacado(A.sobre, 292, Math.min(tr, 22), '#ffffff'); ctx.font = F_SER(400, s1);
+  ctx.fillStyle = '#ffffff'; ctx.textAlign = 'center'; ctx.fillText(l1, W / 2, 399);
+  const t2 = peq + ' ' + l2; caber(t2, n => F_SER(700, n), 132, 800); ctx.fillText(t2, W / 2, 518);
+  ctx.textAlign = 'left'; ctx.font = F_POP(300, 36); espacado('2026', 590, 22, '#ffffff');
+  ctx.fillRect(286, 577, 125, 2.5); ctx.fillRect(669, 577, 125, 2.5);
+  if (mono.complete && mono.naturalWidth) ctx.drawImage(mono, 398.6, 1425, 282, 282 * mono.naturalHeight / mono.naturalWidth);
+  if (Array.isArray(A.logo)) {                          // logo oficial em 2 linhas (Itália): maiúsculas do mesmo tamanho
+    ctx.textAlign = 'center'; ctx.fillStyle = '#ffffff';
+    A.logo.forEach((t, i) => { caber(t, n => F_SER(400, n), 27, 360); ctx.fillText(t, W / 2, 1519 + i * 30); });
+    ctx.textAlign = 'left';
+  } else versalete(A.logo, 1521, 32, 440);
+  ctx.textAlign = 'center'; caber(A.rodape, n => F_MONT(700, n), 31, 960); ctx.fillStyle = '#f5f5f5'; ctx.fillText(A.rodape, W / 2, 1850); ctx.textAlign = 'left';
+}
 function desenhar() {
   ctx.clearRect(0, 0, W, H);
   if (fundo.complete && fundo.naturalWidth) ctx.drawImage(fundo, 0, 0, W, H);
+  if (EXT) arteExterior();   // título, logo e faixa traduzidos (no Brasil já vêm no fundo)
   const vNome = nome.value.trim(), vIgr = igreja.value.trim(), vEnd = endereco.value.trim();
-  const p1 = [['A ', 600], ['Igreja Cristã Maranata', 700], [' tem a honra de convidar você e seus familiares para participar do ', 600], ['Culto Internacional Trombetas e Festas 2026', 700], ['.', 600]];
-  const p2 = [['Será um evento de alerta para o mundo sobre os acontecimentos atuais que antecedem a volta do Senhor Jesus.', 700]];
+  const p1 = EXT ? A.p1 : [['A ', 600], ['Igreja Cristã Maranata', 700], [' tem a honra de convidar você e seus familiares para participar do ', 600], ['Culto Internacional Trombetas e Festas 2026', 700], ['.', 600]];
+  const p2 = [[EXT ? A.p2 : 'Será um evento de alerta para o mundo sobre os acontecimentos atuais que antecedem a volta do Senhor Jesus.', 700]];
   const TOP = 650, BOT = 1380;
   let s = 1, L;
   for (; s > .6; s -= .03) {                       // diminui tudo um pouco se o texto não couber
@@ -165,7 +218,7 @@ function desenhar() {
     L.l1 = quebrar(p1, L.ts, 800, F_MONT); L.l2 = quebrar(p2, L.ts, 800, F_MONT);
     L.ds = 34 * s; L.as = 29 * s; L.alh = L.as * 1.25;
     L.igr = vIgr ? quebrarSimples(vIgr.toUpperCase(), F_POP(700, L.as), 640) : [];
-    L.end = quebrarSimples(vEnd || 'Endereço da igreja', F_POP(400, L.as), 640);
+    L.end = quebrarSimples(vEnd || (EXT ? U.endvazio : 'Endereço da igreja'), F_POP(400, L.as), 640);
     L.gNome = vNome ? 34 * s : 0; L.gP = 38 * s; L.gData = 62 * s; L.gEnd = 26 * s;
     L.total = (vNome ? L.nomeSize * 1.05 + L.gNome : 0) + L.l1.length * L.lh + L.gP + L.l2.length * L.lh + L.gData + L.ds + L.gEnd + (L.igr.length + L.end.length) * L.alh;
     if (L.total <= BOT - TOP) break;
@@ -179,7 +232,7 @@ function desenhar() {
   pintarLinhas(L.l1, L.ts, W / 2, y + L.ts * .95, L.lh, F_MONT, BRANCO); y += L.l1.length * L.lh + L.gP;
   pintarLinhas(L.l2, L.ts, W / 2, y + L.ts * .95, L.lh, F_MONT, BRANCO); y += L.l2.length * L.lh + L.gData;
   // data
-  const dTxt = '28 de Novembro às ' + fuso.value;
+  const dTxt = !EXT ? '28 de Novembro às ' + fuso.value : (V.fusos ? fuso.value : V.data);
   ctx.font = F_POP(400, L.ds); const dw = ctx.measureText(dTxt).width, ic = L.ds * 1.1, gap = L.ds * .55;
   let x = W / 2 - (ic + gap + dw) / 2;
   iconeCalendario(x, y - ic * .02, ic); ctx.fillStyle = '#ffffff'; ctx.fillText(dTxt, x + ic + gap, y + L.ds * .9);
@@ -206,8 +259,8 @@ function arquivoFinal(cb) { tela.toBlob(b => cb(new File([b], arquivoNome(), { t
 let pronto = null, tPronto = null;
 function atualizar() { desenhar(); pronto = null; clearTimeout(tPronto); if (endereco.value.trim()) tPronto = setTimeout(() => arquivoFinal(f => pronto = f), 250); }
 [nome, igreja, endereco].forEach(el => el.addEventListener('input', atualizar)); fuso.addEventListener('change', atualizar);
-fundo.onload = atualizar;
-Promise.all([['600 30px Montserrat'], ['700 30px Montserrat'], ['400 30px Poppins'], ['700 30px Poppins'], ['700 30px Tinos']].map(([f]) => document.fonts.load(f))).then(atualizar, atualizar);
+fundo.onload = atualizar; mono.onload = atualizar;
+Promise.all([['600 30px Montserrat'], ['700 30px Montserrat'], ['400 30px Poppins'], ['700 30px Poppins'], ['700 30px Tinos'], ['400 30px Tinos'], ['300 30px Poppins'], ['400 30px Montserrat']].map(([f]) => document.fonts.load(f))).then(atualizar, atualizar);
 atualizar();
 
 const UA = navigator.userAgent;
@@ -223,24 +276,25 @@ function baixarArquivo(f) { const a = document.createElement('a'); a.href = URL.
 baixar.onclick = () => {
   if (!CELULAR) { pronto ? baixarArquivo(pronto) : arquivoFinal(baixarArquivo); return; }
   if (!APP_INTERNO && pronto && navigator.canShare && navigator.canShare({ files: [pronto] })) {
-    navigator.share({ files: [pronto], title: 'Trombetas e Festas 2026' }).catch(e => { if (e.name !== 'AbortError') mostrarParaSalvar(); });
+    navigator.share({ files: [pronto], title: EXT ? A.tit : 'Trombetas e Festas 2026' }).catch(e => { if (e.name !== 'AbortError') mostrarParaSalvar(); });
     return;
   }
   mostrarParaSalvar();
 };
 compartilhar.onclick = () => {
-  const go = f => { if (navigator.canShare && navigator.canShare({ files: [f] })) navigator.share({ files: [f], title: 'Trombetas e Festas 2026' }).catch(() => {}); else mostrarParaSalvar(); };
+  const go = f => { if (navigator.canShare && navigator.canShare({ files: [f] })) navigator.share({ files: [f], title: EXT ? A.tit : 'Trombetas e Festas 2026' }).catch(() => {}); else mostrarParaSalvar(); };
   pronto ? go(pronto) : arquivoFinal(go);
 };
 </script>
 <script>
 // contador (GoatCounter, sem cookies): visita + quem baixou / enviou, uma vez por abertura. Nome e endereço NÃO são enviados.
 (function () {
-  window.goatcounter = { path: '/convite/brasil', title: 'Convite · brasil' };
+  const L = (new URLSearchParams(location.search).get('lang') || 'brasil').toLowerCase().replace(/[^a-z0-9-]/g, '');
+  window.goatcounter = { path: '/convite/' + L, title: 'Convite · ' + L };
   const feito = {};
   function ev(n) {
     if (feito[n]) return; feito[n] = 1;
-    const go = () => window.goatcounter && window.goatcounter.count && window.goatcounter.count({ path: 'convite-' + n + '/brasil', title: 'Convite ' + n, event: true });
+    const go = () => window.goatcounter && window.goatcounter.count && window.goatcounter.count({ path: 'convite-' + n + '/' + L, title: 'Convite ' + n + ' · ' + L, event: true });
     window.goatcounter && window.goatcounter.count ? go() : setTimeout(go, 1500);
   }
   document.getElementById('baixar').addEventListener('click', () => ev('baixar'));
