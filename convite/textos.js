@@ -113,7 +113,7 @@ const VERSOES = {
   'hu':      { base: 'hu', data: 'November 29., vasárnap, 10:00' },
   'ru':      { base: 'ru', data: '28 ноября, суббота, в 23:00 (МСК)' },
   'es':      { base: 'es', fusos: [
-    ['29 de noviembre a las 10:30 h', 'España · 29/11 · 10:30 h'], ['28 de noviembre a las 17:00 h', 'Argentina, Chile, Paraguay, Uruguay · 28/11 · 17:00 h'],
+    ['29 de noviembre a las 10:30 h', 'España · 29/11 · 10:30 h'], ['28 de noviembre a las 17:00 h', 'Argentina, Paraguay, Uruguay · 28/11 · 17:00 h'], ['28 de noviembre a las 19:00 h', 'Chile · 28/11 · 19:00 h'],
     ['28 de noviembre a las 16:00 h', 'Venezuela · 28/11 · 16:00 h'], ['28 de noviembre a las 15:00 h', 'Colombia · 28/11 · 15:00 h'],
     ['28 de noviembre a las 7:30 p. m.', 'Rep. Dominicana · 28/11 · 7:30 p. m.'], ['28 de noviembre a las 19:00 h', 'Bolivia · 28/11 · 19:00 h'],
     ['29 de noviembre a las 19:00 h', 'Perú · 29/11 · 19:00 h'], ['28 de noviembre a las 7:00 p. m.', 'Panamá · 28/11 · 7:00 p. m.']] },
