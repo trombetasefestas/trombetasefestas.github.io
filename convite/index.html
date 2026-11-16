@@ -43,6 +43,8 @@
   .sec { background: var(--azul-esc) !important; color: var(--branco) !important; }
   .orient { font-size: 13px; opacity: .85; text-align: center; line-height: 1.45; margin: 4px 0 0; }
   .hidden { display: none !important; }
+  .aviso { font-size: 14px; line-height: 1.4; padding: 10px 12px; border-radius: 10px; background: rgba(17,46,78,.55); }
+  .aviso.erro { background: #fff3cd; color: #6b4a00; }
   #salvarBox{position:fixed;inset:0;background:rgba(4,12,26,.94);z-index:50;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:16px;gap:12px}
   #salvarBox img{max-width:100%;max-height:68vh;border-radius:10px;box-shadow:0 8px 30px rgba(0,0,0,.5);-webkit-touch-callout:default;user-select:auto}
   #salvarBox p{color:#fff;text-align:center;font-size:16px;line-height:1.4;margin:0;max-width:440px}
@@ -55,6 +57,7 @@
   <p class="sub" id="t_sub">Digite o nome de quem você quer convidar e o endereço da sua igreja. O convite fica pronto na hora para enviar.</p>
 
   <div class="controles">
+    <p class="aviso hidden" id="avisoIgreja" role="status"></p>
     <label class="campo"><span id="t_nome">Nome do convidado</span> <small id="t_nomeh">(pode ser uma pessoa ou uma família, ex.: Família Souza)</small>
       <input id="nome" maxlength="40" autocomplete="off" placeholder="Ex.: Maria Aparecida"></label>
     <label class="campo"><span id="t_igr">Igreja</span> <small id="t_opc">(opcional)</small>
@@ -262,6 +265,41 @@ function atualizar() { desenhar(); pronto = null; clearTimeout(tPronto); if (end
 fundo.onload = atualizar; mono.onload = atualizar;
 Promise.all([['600 30px Montserrat'], ['700 30px Montserrat'], ['400 30px Poppins'], ['700 30px Poppins'], ['700 30px Tinos'], ['400 30px Tinos'], ['300 30px Poppins'], ['400 30px Montserrat']].map(([f]) => document.fonts.load(f))).then(atualizar, atualizar);
 atualizar();
+
+// /convite/060476 (via 404.html → ?igreja=060476): busca nome e endereço na consulta pública de igrejas da ICM
+(function () {
+  const cod = (new URLSearchParams(location.search).get('igreja') || '').replace(/\D/g, '');
+  if (!cod) return;
+  const codigo = cod.padStart(6, '0'), aviso = $('avisoIgreja');
+  const avisar = (txt, erro) => { aviso.textContent = txt; aviso.classList.toggle('erro', !!erro); aviso.classList.remove('hidden'); };
+  // correções pontuais por código (sobrepõem os campos vindos da consulta; complemento: '' = não preencher)
+  const CORRECOES = {
+    '060782': { complemento: '', bairro: 'MORADA DE CAMBURI' },   // Morada de Camburi: consulta traz complemento "GOAGEIRAS" e bairro Goiabeiras
+  };
+  const PEQ = new Set(['da', 'de', 'do', 'das', 'dos', 'e', 'em', 'na', 'no', 'nas', 'nos']);
+  const titulo = s => (s || '').trim().replace(/\s+/g, ' ').toLowerCase().split(' ').map((p, i) =>
+    /\d|\//.test(p) || /^[ivx]+$/.test(p) ? p.toUpperCase() : (i && PEQ.has(p) ? p : p.charAt(0).toUpperCase() + p.slice(1))).join(' ');
+  avisar('🔎 Buscando os dados da igreja ' + codigo + '…');
+  const url = 'https://portal.presbiterio.org.br/v2/api/patrimonio/consulta-publica-igreja/igrejas?Filtro=' + codigo + '&PaginaAtual=1&PorPagina=50';
+  const ctrl = new AbortController(), tempo = setTimeout(() => ctrl.abort(), 12000);
+  fetch(url, { signal: ctrl.signal }).then(r => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); }).then(d => {
+    const achado = (d.registros || []).find(x => (x.igrejaFmt || '').split(' - ')[0].trim() === codigo);
+    if (!achado) throw new Error('não encontrada');
+    const r = Object.assign({}, achado, CORRECOES[codigo]);
+    const nomeIgr = (r.igrejaFmt || '').split(' - ').slice(1).join(' - ').trim();
+    const comp = (r.complemento || '').trim();
+    const partes = [titulo(r.logradouro)];
+    if (comp && comp !== '-' && comp.toUpperCase() !== (r.bairro || '').trim().toUpperCase()) partes.push(titulo(comp));
+    if (r.bairro) partes.push(titulo(r.bairro));
+    partes.push(titulo(r.cidade) + (r.uf ? '/' + r.uf.trim().toUpperCase() : ''));
+    if (nomeIgr) igreja.value = ('ICM ' + titulo(nomeIgr)).slice(0, igreja.maxLength);
+    endereco.value = partes.filter(Boolean).join(', ').slice(0, endereco.maxLength);
+    atualizar();
+    avisar('✅ Dados da igreja ' + codigo + ' preenchidos. Confira e ajuste se precisar.');
+  }).catch(() => {
+    avisar('⚠️ Não foi possível buscar as informações da igreja ' + codigo + '. Preencha o nome e o endereço da igreja abaixo.', true);
+  }).finally(() => clearTimeout(tempo));
+})();
 
 const UA = navigator.userAgent;
 const CELULAR = /Android|iPhone|iPad|iPod/i.test(UA) || (navigator.maxTouchPoints > 1 && /Mac/.test(navigator.platform));
