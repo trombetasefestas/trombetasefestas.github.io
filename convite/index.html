@@ -43,6 +43,9 @@
   .sec { background: var(--azul-esc) !important; color: var(--branco) !important; }
   .orient { font-size: 13px; opacity: .85; text-align: center; line-height: 1.45; margin: 4px 0 0; }
   .hidden { display: none !important; }
+  .abas { display: flex; width: 100%; max-width: 420px; background: rgba(8,30,55,.35); border-radius: 14px; padding: 4px; gap: 4px; margin: 0 0 14px; }
+  .abas button { flex: 1; border: 0; border-radius: 11px; padding: 11px 6px; font: inherit; font-size: 15px; font-weight: 700; color: #fff; background: transparent; cursor: pointer; }
+  .abas button.ativa { background: var(--dourado); color: var(--azul-esc); }
   #salvarBox{position:fixed;inset:0;background:rgba(4,12,26,.94);z-index:50;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:16px;gap:12px}
   #salvarBox img{max-width:100%;max-height:68vh;border-radius:10px;box-shadow:0 8px 30px rgba(0,0,0,.5);-webkit-touch-callout:default;user-select:auto}
   #salvarBox p{color:#fff;text-align:center;font-size:16px;line-height:1.4;margin:0;max-width:440px}
@@ -54,9 +57,17 @@
   <h1><b id="t_h1">CONVITE</b> · <span id="t_tit">Trombetas e Festas 2026</span></h1>
   <p class="sub" id="t_sub">Digite o nome de quem você quer convidar e o endereço da sua igreja. O convite fica pronto na hora para enviar.</p>
 
+  <div class="abas" id="abas"><button type="button" id="abaPessoal" class="ativa">👨‍👩‍👧 Convite pessoal</button><button type="button" id="abaAut">🏛️ Autoridade</button></div>
+
   <div class="controles">
-    <label class="campo"><span id="t_nome">Nome do convidado</span> <small id="t_nomeh">(pode ser uma pessoa ou uma família, ex.: Família Souza)</small>
+    <label class="campo autBox hidden"><span>Nome da autoridade</span> <small>(com o tratamento, ex.: Exmo. Sr. João da Silva)</small>
+      <input id="autNome" maxlength="60" autocomplete="off" placeholder="Ex.: Exmo. Sr. João da Silva"></label>
+    <label class="campo autBox hidden"><span>Cargo</span> <small>(opcional)</small>
+      <input id="autCargo" maxlength="70" autocomplete="off" placeholder="Ex.: Prefeito Municipal de Vitória"></label>
+    <label class="campo pesBox"><span id="t_nome">Nome do convidado</span> <small id="t_nomeh">(pode ser uma pessoa ou uma família, ex.: Família Souza)</small>
       <input id="nome" maxlength="40" autocomplete="off" placeholder="Ex.: Maria Aparecida"></label>
+    <label class="campo autBox hidden"><span>Traje</span>
+      <input id="traje" maxlength="40" autocomplete="off" value="Passeio completo"></label>
     <label class="campo"><span id="t_igr">Igreja</span> <small id="t_opc">(opcional)</small>
       <input id="igreja" maxlength="50" autocomplete="off" placeholder="Ex.: ICM Praia do Canto"></label>
     <label class="campo"><span id="t_end">Endereço da igreja</span>
@@ -90,6 +101,18 @@ const tela = document.getElementById('tela'), ctx = tela.getContext('2d');
 const $ = id => document.getElementById(id);
 const nome = $('nome'), igreja = $('igreja'), endereco = $('endereco'), fuso = $('fuso'), baixar = $('baixar'), compartilhar = $('compartilhar');
 const fundo = new Image(); fundo.src = EXT ? 'fundo_exterior_9x16.png' : 'fundo_convite_9x16.png';
+const fundoAut = new Image(); if (!EXT) fundoAut.src = 'fundo_autoridade_1x1.jpg';
+const autNome = $('autNome'), autCargo = $('autCargo'), traje = $('traje');
+let AUT = !EXT && new URLSearchParams(location.search).get('tipo') === 'autoridade';   // aba Autoridade (só no Brasil)
+function modo(aut) {
+  AUT = aut; tela.height = AUT ? 1080 : H;
+  $('abaPessoal').classList.toggle('ativa', !AUT); $('abaAut').classList.toggle('ativa', AUT);
+  document.querySelectorAll('.autBox').forEach(e => e.classList.toggle('hidden', !AUT));
+  document.querySelectorAll('.pesBox').forEach(e => e.classList.toggle('hidden', AUT));
+  $('t_sub').textContent = AUT ? 'Convite formal para autoridades: digite o nome e o cargo, a igreja e o endereço. O convite fica pronto na hora para enviar.'
+                               : 'Digite o nome de quem você quer convidar e o endereço da sua igreja. O convite fica pronto na hora para enviar.';
+  if (typeof atualizar === 'function') atualizar();
+}
 const mono = new Image(); if (EXT) mono.src = 'monograma_im.png';
 
 if (EXT) {                                             // página traduzida
@@ -101,6 +124,7 @@ if (EXT) {                                             // página traduzida
   nome.placeholder = U.nomeph; igreja.placeholder = U.igrph; endereco.placeholder = U.endph;
   if (V.fusos) fuso.innerHTML = V.fusos.map(([v, r]) => `<option value="${v}">${r}</option>`).join('');
   else $('fusoBox').classList.add('hidden');
+  $('abas').classList.add('hidden');
 }
 
 const BRANCO = '#f5f5f5', DOURADO = '#f6d078', PIN = '#c2edff';
@@ -198,7 +222,71 @@ function arteExterior() {
   } else versalete(A.logo, 1521, 32, 440);
   ctx.textAlign = 'center'; caber(A.rodape, n => F_MONT(700, n), 31, 960); ctx.fillStyle = '#f5f5f5'; ctx.fillText(A.rodape, W / 2, 1850); ctx.textAlign = 'left';
 }
+function iconeCal2(x, y, s, cor) {          // ícones de traço fino, como no modelo
+  ctx.save(); ctx.strokeStyle = cor; ctx.lineWidth = 2.2; ctx.beginPath(); ctx.roundRect(x, y + s * .12, s, s * .85, s * .12); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(x, y + s * .36); ctx.lineTo(x + s, y + s * .36); ctx.moveTo(x + s * .28, y); ctx.lineTo(x + s * .28, y + s * .24); ctx.moveTo(x + s * .72, y); ctx.lineTo(x + s * .72, y + s * .24); ctx.stroke();
+  ctx.beginPath(); ctx.arc(x + s * .62, y + s * .68, s * .2, 0, 7); ctx.stroke(); ctx.restore();
+}
+function iconePin2(x, y, s, cor) {
+  ctx.save(); ctx.strokeStyle = cor; ctx.lineWidth = 2.2; const cx = x + s / 2, r = s * .3;
+  ctx.beginPath(); ctx.arc(cx, y + r + 2, r, Math.PI * .85, Math.PI * .15); ctx.lineTo(cx, y + s * .82); ctx.closePath(); ctx.stroke();
+  ctx.beginPath(); ctx.arc(cx, y + r + 2, r * .38, 0, 7); ctx.stroke();
+  ctx.beginPath(); ctx.ellipse(cx, y + s * .88, s * .42, s * .1, 0, 0, 7); ctx.stroke(); ctx.restore();
+}
+function iconeTraje(x, y, s, cor) {
+  ctx.save(); ctx.strokeStyle = cor; ctx.lineWidth = 2.2; ctx.beginPath();
+  ctx.moveTo(x + s * .32, y); ctx.lineTo(x + s * .5, y + s * .3); ctx.lineTo(x + s * .68, y);
+  ctx.lineTo(x + s * .95, y + s * .12); ctx.lineTo(x + s * .95, y + s); ctx.lineTo(x + s * .05, y + s); ctx.lineTo(x + s * .05, y + s * .12); ctx.closePath();
+  ctx.moveTo(x + s * .5, y + s * .3); ctx.lineTo(x + s * .5, y + s); ctx.moveTo(x + s * .32, y); ctx.lineTo(x + s * .4, y + s * .55); ctx.lineTo(x + s * .5, y + s * .3);
+  ctx.moveTo(x + s * .68, y); ctx.lineTo(x + s * .6, y + s * .55); ctx.lineTo(x + s * .5, y + s * .3); ctx.stroke(); ctx.restore();
+}
+function desenharAutoridade() {
+  const S = 1080; ctx.clearRect(0, 0, S, S);
+  if (fundoAut.complete && fundoAut.naturalWidth) ctx.drawImage(fundoAut, 0, 0, S, S);
+  const vNome = autNome.value.trim(), vCargo = autCargo.value.trim(), vIgr = igreja.value.trim(), vEnd = endereco.value.trim(), vTraje = traje.value.trim();
+  const TOP = 372, BOT = 735, CX = S / 2, ICON = '#d8c49a';
+  const nomeTxt = vNome || '[Nome da autoridade]';
+  const local = [vIgr, vEnd].filter(Boolean).join(' – ') || 'Igreja Cristã Maranata e endereço';
+  const dataTxt = '28 de novembro de 2026, às ' + fuso.value;
+  let s = 1, L;
+  for (; s > .55; s -= .03) {
+    L = {};
+    L.ps = 27 * s; L.plh = L.ps * 1.45;
+    L.ns = 44 * s; ctx.font = F_SER(700, L.ns); while (ctx.measureText(nomeTxt).width > 820 && L.ns > 24) { L.ns -= 1; ctx.font = F_SER(700, L.ns); }
+    L.cg = vCargo ? quebrarSimples(vCargo.toUpperCase(), F_POP(400, 23 * s), 760) : [];
+    L.cs = 23 * s; L.clh = L.cs * 1.35;
+    L.ts = 46 * s; L.ds = 26 * s; L.dlh = L.ds * 1.45;
+    ctx.font = F_POP(700, L.ds); const lw = ctx.measureText('Local: ').width;
+    L.loc = quebrarSimples(local, F_POP(400, L.ds), 700 - lw); L.lw = lw;
+    L.total = L.plh + 10 * s + L.ns * 1.15 + L.cg.length * L.clh + 10 * s + L.plh + 18 * s + L.ts * 1.2 + 26 * s + L.dlh * (1 + L.loc.length + (vTraje ? 1 : 0)) + 8 * s;
+    if (L.total <= BOT - TOP) break;
+  }
+  let y = TOP + (BOT - TOP - L.total) / 2; ctx.textAlign = 'center'; ctx.textBaseline = 'alphabetic';
+  ctx.fillStyle = '#ffffff'; ctx.font = F_POP(300, L.ps); ctx.fillText('A Igreja Cristã Maranata tem a honra de convidar', CX, y + L.ps); y += L.plh + 10 * s;
+  ctx.globalAlpha = vNome ? 1 : .5; ctx.fillStyle = DOURADO; ctx.font = F_SER(700, L.ns); ctx.fillText(nomeTxt, CX, y + L.ns * .85); ctx.globalAlpha = 1; y += L.ns * 1.15;
+  ctx.fillStyle = '#ffffff'; ctx.font = F_POP(400, L.cs); L.cg.forEach((t, i) => ctx.fillText(t, CX, y + L.cs + i * L.clh)); y += L.cg.length * L.clh + 10 * s;
+  ctx.font = F_POP(300, L.ps); ctx.fillText('para participar do evento mundial de evangelização:', CX, y + L.ps); y += L.plh + 18 * s;
+  ctx.font = F_POP(400, L.ts); ctx.fillText('TROMBETAS & FESTAS 2026', CX, y + L.ts * .95); y += L.ts * 1.2 + 26 * s;
+  // detalhes alinhados à esquerda, bloco centralizado
+  const linhas = [[['Data e hora: ' + dataTxt, 700]], ...L.loc.map((t, i) => i ? [[t, 400]] : [['Local: ', 700], [t, 400]])];
+  if (vTraje) linhas.push([['Traje: ', 700], [vTraje, 400]]);
+  const larg = linhas.map(l => l.reduce((a, [t, p]) => { ctx.font = F_POP(p, L.ds); return a + ctx.measureText(t).width; }, 0));
+  const ic = L.ds * 1.05, gx = ic + 14 * s, bw = Math.max(...larg) + gx, x0 = CX - bw / 2;
+  ctx.textAlign = 'left';
+  linhas.forEach((l, i) => {
+    const yy = y + L.ds + i * L.dlh, cont = i >= 2 && i <= L.loc.length;
+    let x = x0 + gx + (cont ? L.lw : 0);
+    l.forEach(([t, p]) => { ctx.font = F_POP(p, L.ds); ctx.fillStyle = '#ffffff'; ctx.globalAlpha = (p === 400 && !vEnd && i > 0 && i <= L.loc.length) ? .55 : 1; ctx.fillText(t, x, yy); x += ctx.measureText(t).width; });
+    ctx.globalAlpha = 1;
+    if (i === 0) iconeCal2(x0, yy - ic * .85, ic, ICON);
+    else if (i === 1) iconePin2(x0, yy - ic * .85, ic, ICON);
+    else if (vTraje && i === linhas.length - 1) iconeTraje(x0, yy - ic * .85, ic, ICON);
+  });
+  baixar.disabled = !(vNome && vEnd);
+  compartilhar.classList.toggle('hidden', !(vNome && vEnd && navigator.canShare));
+}
 function desenhar() {
+  if (AUT) return desenharAutoridade();
   ctx.clearRect(0, 0, W, H);
   if (fundo.complete && fundo.naturalWidth) ctx.drawImage(fundo, 0, 0, W, H);
   if (EXT) arteExterior();   // título, logo e faixa traduzidos (no Brasil já vêm no fundo)
@@ -252,14 +340,16 @@ function desenhar() {
 }
 
 function arquivoNome() {
-  const n = nome.value.trim().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^A-Za-z0-9]+/g, '-').replace(/^-|-$/g, '').toLowerCase();
-  return 'convite-trombetas-e-festas-2026' + (n ? '-' + n : '') + '.jpg';
+  const n = (AUT ? autNome : nome).value.trim().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^A-Za-z0-9]+/g, '-').replace(/^-|-$/g, '').toLowerCase();
+  return 'convite-' + (AUT ? 'autoridade-' : '') + 'trombetas-e-festas-2026' + (n ? '-' + n : '') + '.jpg';
 }
 function arquivoFinal(cb) { tela.toBlob(b => cb(new File([b], arquivoNome(), { type: 'image/jpeg' })), 'image/jpeg', 0.92); }
 let pronto = null, tPronto = null;
 function atualizar() { desenhar(); pronto = null; clearTimeout(tPronto); if (endereco.value.trim()) tPronto = setTimeout(() => arquivoFinal(f => pronto = f), 250); }
-[nome, igreja, endereco].forEach(el => el.addEventListener('input', atualizar)); fuso.addEventListener('change', atualizar);
-fundo.onload = atualizar; mono.onload = atualizar;
+[nome, igreja, endereco, autNome, autCargo, traje].forEach(el => el.addEventListener('input', atualizar)); fuso.addEventListener('change', atualizar);
+fundo.onload = atualizar; mono.onload = atualizar; fundoAut.onload = atualizar;
+$('abaPessoal').onclick = () => modo(false); $('abaAut').onclick = () => modo(true);
+if (AUT) modo(true);
 Promise.all([['600 30px Montserrat'], ['700 30px Montserrat'], ['400 30px Poppins'], ['700 30px Poppins'], ['700 30px Tinos'], ['400 30px Tinos'], ['300 30px Poppins'], ['400 30px Montserrat']].map(([f]) => document.fonts.load(f))).then(atualizar, atualizar);
 atualizar();
 
@@ -297,8 +387,9 @@ compartilhar.onclick = () => {
     const go = () => window.goatcounter && window.goatcounter.count && window.goatcounter.count({ path: 'convite-' + n + '/' + L, title: 'Convite ' + n + ' · ' + L, event: true });
     window.goatcounter && window.goatcounter.count ? go() : setTimeout(go, 1500);
   }
-  document.getElementById('baixar').addEventListener('click', () => ev('baixar'));
-  document.getElementById('compartilhar').addEventListener('click', () => ev('enviar'));
+  const tipo = () => (typeof AUT !== 'undefined' && AUT) ? 'autoridade-' : '';
+  document.getElementById('baixar').addEventListener('click', () => ev(tipo() + 'baixar'));
+  document.getElementById('compartilhar').addEventListener('click', () => ev(tipo() + 'enviar'));
 })();
 </script>
 <script data-goatcounter="https://trombetasefestas.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
